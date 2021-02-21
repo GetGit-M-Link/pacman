@@ -1,0 +1,1 @@
+Bitte fügen Sie alle Dateien, die zum Ausführen des Programms notwendig sind in dieses Verzeichnis. Wir kopieren den Inhalt dieses Verzeichnisses in das Verzeichnis des erzeugten ausführbaren Programms,bevor wir Ihre Abgabe testen.
