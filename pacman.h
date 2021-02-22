@@ -2,6 +2,7 @@
 #define PACMAN_H
 
 #include <ConsoleWindow.h>
+#include <QElapsedTimer>
 
 /**
  * @todo write docs
@@ -20,7 +21,7 @@ enum ghost_direction {
     directionUp, directionDown, directionLeft, directionRight,
 };
 enum state_of_game {
-    gameOver, theGameIsOn
+    gameOver, theGameIsOn, gameWon
 };
 class Pacman{
 public:
@@ -35,9 +36,12 @@ class PacmanWindow : public ConsoleWindow
 {
     Pacman player;
     state_of_game gameState;
+    int levelMaxPoints;
     std::vector<std::vector<char>> levelMap;
-    std::vector<std::vector<char>> Parsemap();
+    std::vector<std::vector<char>> Parsemap(int &pointCount);
     void Initialize();
+    std::string timeNeeded;
+    QElapsedTimer timer;
     
  protected:
     virtual void onRefresh() override;
