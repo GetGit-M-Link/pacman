@@ -8,10 +8,11 @@
 
 Pacman::Pacman(){
    points = 0;
+   direction = directionNone;
    
      
 };
-void Pacman::SetPosition(int x, int y)
+void Meeple::SetPosition(int x, int y)
 {
     position = coordinates(x,y);
 }
@@ -33,11 +34,14 @@ std::vector<std::vector<char>> PacmanWindow::Parsemap(int &pointCount)
     std::string s;
     while (std::getline(file, s)) {
         std::vector<char> line;
+        int column = 0;
         for (char c : s){
-            if (c == 'G') { c = ' ';}
+            
+            if (c == 'G') { ;}
             if (c == 'g') { c = ' ';}
             line.push_back(c);
             if (c == '.') { pointCount++;}
+            column++;
         }
         Levelmap.push_back(line);
     }
@@ -82,6 +86,10 @@ void PacmanWindow::Initialize()
 
 void PacmanWindow::onRefresh()
 {
+      coordinates movingtoPosition = player.position;
+     bool emptySpace;
+     bool pointFood;
+    
     switch(gameState){
         case theGameIsOn:
             writeString(0,  0, "Punkte: " + std::to_string(player.points) + "/" + std::to_string(levelMaxPoints) + "        Eis-Pacman!         Zeit:" + std::to_string(timer.elapsed()/1000) + "sec");
@@ -89,28 +97,7 @@ void PacmanWindow::onRefresh()
                 gameState = gameWon;
                 timeNeeded = std::to_string(timer.elapsed()/1000);
             }
-            break;
-        case gameWon:
-            clear(' ');
-            writeString(5,5,"Klasse! Level geschafft in " + timeNeeded + " Sekunden" );
-            break;
-        case gameOver:
-            clear(' ');
-            writeString(5,5,"Game Over");
-            break;
-        
-}
-}
-
-void PacmanWindow::onKeyPress()
-{
-     coordinates movingtoPosition = player.position;
-     bool emptySpace;
-     bool pointFood;
-    switch(gameState){
-        case theGameIsOn:
-           
-    
+            
             if (getPressedKey() == CURSOR_UP){
                 movingtoPosition = coordinates(player.position.x, (player.position.y - 1));}
             if (getPressedKey() == CURSOR_DOWN){
@@ -130,18 +117,24 @@ void PacmanWindow::onKeyPress()
             
             }
         }
-            onRefresh();
+    
+            
             break;
         case gameWon:
             clear(' ');
-            writeString(5,5,"Congratulations you beat the level");
+             writeString(5,5,"Klasse! Level geschafft in " + timeNeeded + " Sekunden" );
             if (getPressedKey() == 'y'){ Initialize();}
             break;
         case gameOver:
             clear(' ');
             writeString(5,5,"Game Over");
             break;
-    }
+        
+}
+}
 
+
+void PacmanWindow::onKeyPress()
+{ 
          
 }
