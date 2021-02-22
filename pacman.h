@@ -17,24 +17,37 @@ struct coordinates{
     }
     
 };
-enum ghost_direction {
-    directionUp, directionDown, directionLeft, directionRight,
+enum move_direction {
+    directionUp, directionDown, directionLeft, directionRight, directionNone
 };
 enum state_of_game {
-    gameOver, theGameIsOn, gameWon
+    gameOver, theGameIsOn, gameWon,
 };
-class Pacman{
+class Meeple{
 public:
-    coordinates position = coordinates(0,0);
+     coordinates position = coordinates(0,0);
+     void SetPosition(int x, int y); 
+     move_direction direction; 
+     
+};
+class Pacman : public Meeple{
+public:
     int points;
     Pacman();
-    void SetPosition(int x, int y); 
     void EatPoint();
+    coordinates Move(const char& pressedKey);
     
 };
+class StupidGhost : public Meeple{
+public:
+    StupidGhost(int x, int y);
+    coordinates Move();
+};
+ 
 class PacmanWindow : public ConsoleWindow
 {
     Pacman player;
+    std::vector<StupidGhost> stupid_ghosts;
     state_of_game gameState;
     int levelMaxPoints;
     std::vector<std::vector<char>> levelMap;
@@ -42,6 +55,9 @@ class PacmanWindow : public ConsoleWindow
     void Initialize();
     std::string timeNeeded;
     QElapsedTimer timer;
+    void writeHeader();
+    void checkIfWin();
+    void MoveGhosts();
     
  protected:
     virtual void onRefresh() override;
