@@ -1,4 +1,5 @@
 #include "pacman.h"
+#include "characters.h"
 
 #include <vector>
 #include <string>
@@ -6,84 +7,6 @@
 #include <fstream>
 #include <QElapsedTimer>
 
-
-/// aus ConsoleDemo:
-int rrnd(int min_value, int max_value)
-{
-    double v = std::rand();
-    v /= (static_cast<double>(RAND_MAX) + 1.0);
-    v *= (max_value - min_value);
-    v += min_value;
-    return static_cast<int>(v);
-}
-
-//Direction-Randomizer
-move_direction rrndDirection(){
-    int random = rrnd(0,3);
-    switch(random){
-        case 0:
-            return directionUp;
-        case 1:
-            return directionDown;
-        case 2:
-            return directionLeft;
-        case 3:
-            return directionRight;
-        default:
-            return directionUp;
-    }
-    
-}
-
-Pacman::Pacman(){
-   points = 0;
-   direction = directionNone;
-   
-     
-};
-void Meeple::SetPosition(int x, int y)
-{
-    position = coordinates(x,y);
-}
-void Pacman::EatPoint()
-{
-    points++;
-}
-coordinates Pacman::Move(const char& pressedKey)
-{
-    coordinates movingtoPosition = this->position;
-    if      (pressedKey == 3){
-                movingtoPosition = coordinates(this->position.x, (this->position.y - 1));}
-            if (pressedKey == 4){
-                movingtoPosition = coordinates(this->position.x, (this->position.y + 1));}
-            if (pressedKey == 1){
-                movingtoPosition = coordinates((this->position.x - 1), this->position.y);}
-            if (pressedKey == 2){
-                movingtoPosition = coordinates((this->position.x + 1), this->position.y);}
-    return movingtoPosition;
-}
-StupidGhost::StupidGhost(int x, int y){
-    position = coordinates(x,y);
-    isParkedOnDot = true;
-    
-    
-}
-coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirections)
-{
-    direction = possibleDirections[rrnd(0,possibleDirections.size())];
-    coordinates movingtoPosition = this->position;
-    if (direction == directionUp){
-         movingtoPosition = coordinates(this->position.x, (this->position.y - 1));}
-    if (direction == directionDown){
-        movingtoPosition = coordinates(this->position.x, (this->position.y + 1));}
-    if (direction == directionLeft){
-                movingtoPosition = coordinates((this->position.x - 1), this->position.y);}
-    if (direction == directionRight){
-        movingtoPosition = coordinates((this->position.x + 1), this->position.y);}
-   
-   
-    return movingtoPosition;
-}
 
 
 
@@ -104,8 +27,9 @@ std::vector<std::vector<char>> PacmanWindow::Parsemap(int &pointCount)
         int column = 0;
         for (char c : s){
             
-            if (c == 'G') { stupid_ghosts.push_back(StupidGhost(column, lineNumber +1));}
-            if (c == 'g') { c = 'G'; stupid_ghosts.push_back(StupidGhost(column, lineNumber));}
+            if ((c == 'G')||(c == 'g')) { ghosts_original_pos.push_back(coordinates(column, lineNumber +1));}
+            if (c == 'g') { ghosts.push_back(new StupidGhost(column, lineNumber +1));}
+            if (c == 'G') { ghosts.push_back(new NotAsStupidGhost(column, lineNumber +1));}
             line.push_back(c);
             if (c == '.') { pointCount++;}
             column++;
@@ -131,7 +55,12 @@ void PacmanWindow::Initialize()
     int lineNumber = 1;
     gameState = theGameIsOn;
     timeNeeded = "";
+    //reset pacman
     player.points = 0;
+    //reset ghosts
+    for (int32_t i = 0; i < ghosts.size(); i++){
+        ghosts[i]->position = ghosts_original_pos[i];
+    }
     writeString(0,  0, "Punkte: " + std::to_string(player.points) + "/" + std::to_string(levelMaxPoints) );
     for (std::vector<char> line : levelMap){
         // convert a vector of chars to std::string https://www.techiedelight.com/convert-vector-chars-std-string/ start
@@ -161,16 +90,16 @@ void PacmanWindow::checkIfWin()
        timeNeeded = std::to_string(timer.elapsed()/1000);
             }
 }
-std::vector<move_direction> PacmanWindow::GetPossibleDirections(const StupidGhost& ghost)
+std::vector<move_direction> PacmanWindow::GetPossibleDirections(const Meeple* meeple)
 {
     std::vector<move_direction> possibleDirections;
-    if ((getCharacter(ghost.position.x, ghost.position.y - 1) == ' ')||getCharacter(ghost.position.x, ghost.position.y - 1) == '.'){
+    if ((getCharacter(meeple->position.x, meeple->position.y - 1) == ' ')||getCharacter(meeple->position.x, meeple->position.y - 1) == '.'){
         possibleDirections.push_back(directionUp); }
-    if ((getCharacter(ghost.position.x, ghost.position.y + 1) == ' ')||getCharacter(ghost.position.x, ghost.position.y + 1) == '.'){
+    if ((getCharacter(meeple->position.x, meeple->position.y + 1) == ' ')||getCharacter(meeple->position.x, meeple->position.y + 1) == '.'){
         possibleDirections.push_back(directionDown); }
-    if ((getCharacter(ghost.position.x-1, ghost.position.y) == ' ')||getCharacter(ghost.position.x-1, ghost.position.y) == '.'){
+    if ((getCharacter(meeple->position.x-1, meeple->position.y) == ' ')||getCharacter(meeple->position.x-1, meeple->position.y) == '.'){
         possibleDirections.push_back(directionLeft); }
-    if ((getCharacter(ghost.position.x+1, ghost.position.y) == ' ')||getCharacter(ghost.position.x+1, ghost.position.y) == '.'){
+    if ((getCharacter(meeple->position.x+1, meeple->position.y) == ' ')||getCharacter(meeple->position.x+1, meeple->position.y) == '.'){
         possibleDirections.push_back(directionRight); }
    return possibleDirections;
     
@@ -178,22 +107,22 @@ std::vector<move_direction> PacmanWindow::GetPossibleDirections(const StupidGhos
 
 void PacmanWindow::MoveGhosts()
 {
-    for (StupidGhost &ghost  : stupid_ghosts){
+    for (Ghost* ghost  : ghosts){
         std::vector<move_direction> possibleDirections = GetPossibleDirections(ghost);
-        coordinates newPos = ghost.Move(possibleDirections);
+        coordinates newPos = ghost->Move(possibleDirections, player);
         bool emptySpace = getCharacter(newPos.x, newPos.y) == ' ';
         bool point = getCharacter(newPos.x, newPos.y) == '.';
         if (emptySpace || point){
             // Verhindere dass Geist Punkte frisst
-            if (!ghost.isParkedOnDot){
-                setCharacter(ghost.position.x, ghost.position.y, ' ');
+            if (!ghost->isParkedOnDot){
+                setCharacter(ghost->position.x, ghost->position.y, ' ');
             }
             else {
-                setCharacter(ghost.position.x, ghost.position.y, '.');
+                setCharacter(ghost->position.x, ghost->position.y, '.');
             }
-            point ? ghost.isParkedOnDot = true : ghost.isParkedOnDot = false;
+            point ? ghost->isParkedOnDot = true : ghost->isParkedOnDot = false;
             setCharacter(newPos.x, newPos.y, 'G');
-            ghost.position = newPos;
+            ghost->position = newPos;
         }
         else {
          //std::cout << s  << std::endl;
@@ -218,7 +147,8 @@ void PacmanWindow::onRefresh()
             checkIfWin();
             if (currentCycle == 0){
                 currentCycle++;
-            movingtoPosition = player.Move(key);
+            std::vector<move_direction> pacmansOptions = GetPossibleDirections(&player);
+            movingtoPosition = player.Move(key, pacmansOptions);
             MoveGhosts();
             
             //Untersucht das Feld auf dass sich bewegt werden soll
@@ -249,11 +179,14 @@ void PacmanWindow::onRefresh()
             clear(' ');
              writeString(5,5,"Klasse! Level geschafft in " + timeNeeded + " Sekunden" );
             if (getPressedKey() == 'y'){ Initialize();}
+            if (getPressedKey() == 'n'){ Cleanup();close();}
             break;
             
         case gameOver:
             clear(' ');
             writeString(5,5,"Game Over");
+            if (getPressedKey() == 'y'){ Initialize();}
+            if (getPressedKey() == 'n'){ Cleanup(); close();}
             break;
         
 }
@@ -263,4 +196,12 @@ void PacmanWindow::onRefresh()
 void PacmanWindow::onKeyPress()
 { 
          
+}
+void PacmanWindow::Cleanup()
+{
+    for (Ghost* ghost : ghosts){
+        delete ghost;
+        ghosts.pop_back();
+    }
+
 }

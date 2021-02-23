@@ -3,54 +3,25 @@
 
 #include <ConsoleWindow.h>
 #include <QElapsedTimer>
+#include "characters.h"
 
 /**
  * @todo write docs
  */
 
-struct coordinates{
-    int x;
-    int y;
-    coordinates(int x, int y){
-        this->x = x;
-        this->y = y;
-    }
-    
-};
-enum move_direction {
-    directionUp, directionDown, directionLeft, directionRight, directionNone
-};
+enum move_direction;
 enum state_of_game {
     gameOver, theGameIsOn, gameWon,
 };
-class Meeple{
-public:
-     coordinates position = coordinates(0,0);
-     void SetPosition(int x, int y); 
-     move_direction direction; 
-     
-};
-class Pacman : public Meeple{
-public:
-    int points;
-    Pacman();
-    void EatPoint();
-    coordinates Move(const char& pressedKey);
-    
-};
-class StupidGhost : public Meeple{
-public:
-    StupidGhost(int x, int y);
-    bool isParkedOnDot;
-    coordinates Move(const std::vector<move_direction> &possibleDirections);
-};
+
  
 class PacmanWindow : public ConsoleWindow
 {
     int cycle = 3;
     int currentCycle = 0;
     Pacman player;
-    std::vector<StupidGhost> stupid_ghosts;
+    std::vector<coordinates> ghosts_original_pos;
+    std::vector<Ghost*> ghosts;
     state_of_game gameState;
     int levelMaxPoints;
     std::vector<std::vector<char>> levelMap;
@@ -60,8 +31,9 @@ class PacmanWindow : public ConsoleWindow
     QElapsedTimer timer;
     void writeHeader();
     void checkIfWin();
-    std::vector<move_direction> GetPossibleDirections(const StupidGhost &ghost);
+    std::vector<move_direction> GetPossibleDirections(const Meeple* meeple);
     void MoveGhosts();
+    void Cleanup();
   
     
  protected:
