@@ -13,7 +13,7 @@ enum move_direction;
 enum state_of_game {
     gameOver, theGameIsOn, gameWon,
 };
-
+enum on_screen { menu, game};
  
 class PacmanWindow : public ConsoleWindow
 {
@@ -23,11 +23,14 @@ class PacmanWindow : public ConsoleWindow
     std::vector<coordinates> ghosts_original_pos;
     std::vector<Ghost*> ghosts;
     state_of_game gameState;
+    on_screen currentScreen;
     int levelMaxPoints;
     std::vector<std::vector<char>> levelMap;
     std::vector<std::vector<char>> Parsemap(int &pointCount);
+    std::string levelFile;
     void Initialize();
-    std::string timeNeeded;
+    int timeNeeded;
+    int bestTime;
     QElapsedTimer timer;
     void writeHeader();
     void checkIfWin();

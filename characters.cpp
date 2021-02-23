@@ -81,6 +81,7 @@ coordinates Pacman::Move(const char& pressedKey, const std::vector<move_directio
 StupidGhost::StupidGhost(int x, int y){
     position = coordinates(x,y);
     isParkedOnDot = true;
+    symbol = 'g';
 }
 NotAsStupidGhost::NotAsStupidGhost(int x, int y)
 {
@@ -88,6 +89,7 @@ NotAsStupidGhost::NotAsStupidGhost(int x, int y)
     position = coordinates(x,y);
     isParkedOnDot = true;
     everySecondMove = 0;
+    symbol = 'G';
 }
 coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman)
 {

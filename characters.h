@@ -16,6 +16,7 @@ struct coordinates{
 enum move_direction {
     directionUp, directionDown, directionLeft, directionRight, directionNone
 };
+
 class Meeple{
 public:
      coordinates position = coordinates(0,0);
@@ -38,6 +39,7 @@ public:
     Ghost() = default;
     bool isParkedOnDot;
     virtual coordinates Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman) = 0;
+    char symbol;
     
 };
 class StupidGhost : public Ghost{
