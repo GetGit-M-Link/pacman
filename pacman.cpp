@@ -93,13 +93,13 @@ void PacmanWindow::checkIfWin()
 std::vector<move_direction> PacmanWindow::GetPossibleDirections(const Meeple* meeple)
 {
     std::vector<move_direction> possibleDirections;
-    if ((getCharacter(meeple->position.x, meeple->position.y - 1) == ' ')||getCharacter(meeple->position.x, meeple->position.y - 1) == '.'){
+    if ((getCharacter(meeple->position.x, meeple->position.y - 1) == ' ')||(getCharacter(meeple->position.x, meeple->position.y - 1) == '.')||getCharacter(meeple->position.x, meeple->position.y - 1) =='*'){
         possibleDirections.push_back(directionUp); }
-    if ((getCharacter(meeple->position.x, meeple->position.y + 1) == ' ')||getCharacter(meeple->position.x, meeple->position.y + 1) == '.'){
+    if ((getCharacter(meeple->position.x, meeple->position.y + 1) == ' ')||(getCharacter(meeple->position.x, meeple->position.y + 1) == '.')||(getCharacter(meeple->position.x, meeple->position.y + 1) == '*')){
         possibleDirections.push_back(directionDown); }
-    if ((getCharacter(meeple->position.x-1, meeple->position.y) == ' ')||getCharacter(meeple->position.x-1, meeple->position.y) == '.'){
+    if ((getCharacter(meeple->position.x-1, meeple->position.y) == ' ')||(getCharacter(meeple->position.x-1, meeple->position.y) == '.')||(getCharacter(meeple->position.x-1, meeple->position.y) == '*')){
         possibleDirections.push_back(directionLeft); }
-    if ((getCharacter(meeple->position.x+1, meeple->position.y) == ' ')||getCharacter(meeple->position.x+1, meeple->position.y) == '.'){
+    if ((getCharacter(meeple->position.x+1, meeple->position.y) == ' ')||(getCharacter(meeple->position.x+1, meeple->position.y) == '.')||(getCharacter(meeple->position.x+1, meeple->position.y) == '*')){
         possibleDirections.push_back(directionRight); }
    return possibleDirections;
     
@@ -112,6 +112,7 @@ void PacmanWindow::MoveGhosts()
         coordinates newPos = ghost->Move(possibleDirections, player);
         bool emptySpace = getCharacter(newPos.x, newPos.y) == ' ';
         bool point = getCharacter(newPos.x, newPos.y) == '.';
+        bool eatPacman = getCharacter(newPos.x, newPos.y) == '*';
         if (emptySpace || point){
             // Verhindere dass Geist Punkte frisst
             if (!ghost->isParkedOnDot){
@@ -123,8 +124,10 @@ void PacmanWindow::MoveGhosts()
             point ? ghost->isParkedOnDot = true : ghost->isParkedOnDot = false;
             setCharacter(newPos.x, newPos.y, 'G');
             ghost->position = newPos;
+            
         }
         else {
+            if (eatPacman){gameState = gameOver;}
          //std::cout << s  << std::endl;
          
      }

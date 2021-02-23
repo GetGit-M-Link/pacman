@@ -41,11 +41,13 @@ public:
     
 };
 class StupidGhost : public Ghost{
+    
 public:
     StupidGhost(int x, int y);
     coordinates Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman) override;
 };
 class NotAsStupidGhost : public Ghost{
+    int everySecondMove;
 public:
     NotAsStupidGhost(int x, int y);
     coordinates Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman) override;

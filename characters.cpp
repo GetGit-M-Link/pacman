@@ -84,8 +84,10 @@ StupidGhost::StupidGhost(int x, int y){
 }
 NotAsStupidGhost::NotAsStupidGhost(int x, int y)
 {
+    
     position = coordinates(x,y);
     isParkedOnDot = true;
+    everySecondMove = 0;
 }
 coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman)
 {
@@ -111,6 +113,8 @@ coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDi
     bool down= false;
     bool left= false;
     bool right= false;
+     if (everySecondMove == 0){
+                everySecondMove++;
     for (move_direction direction : possibleDirections){
         if (direction == directionUp){up = true;}
         if (direction == directionDown){down = true;}
@@ -118,29 +122,33 @@ coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDi
         if (direction == directionRight){right = true;}
     }   
     if (up) { 
-        //movingtoPosition = coordinates(movingtoPosition.x, (movingtoPosition.y - 1));}
-       movingtoPosition = coordinates(this->position.x, this->position.y-1); 
-       max = abs((pacman.position.y - movingtoPosition.y-1));
+            movingtoPosition = coordinates(this->position.x, this->position.y-1); 
+            max = abs((pacman.position.y - movingtoPosition.y-1));
     }
    
-    if (down){//movingtoPosition = coordinates(movingtoPosition.x, (movingtoPosition.y + 1));}
-        if (max < (abs(pacman.position.y - movingtoPosition.y+1))){
-            max = abs(pacman.position.y - movingtoPosition.y+1);
-        movingtoPosition = coordinates(this->position.x, this->position.y+1);
-    }
-    }
-    
-    if (left) {//movingtoPosition = coordinates((movingtoPosition.x - 1), movingtoPosition.y);}
-        if (max < (abs(pacman.position.x - movingtoPosition.x-1))){
-            max = abs(pacman.position.x - movingtoPosition.x-1);
-            movingtoPosition = coordinates(this->position.x-1, this->position.y);
-    }
+    if (down){
+            if (max < (abs(pacman.position.y - movingtoPosition.y+1))){ 
+                max = abs(pacman.position.y - movingtoPosition.y+1);
+                movingtoPosition = coordinates(this->position.x, this->position.y+1);
+            }
     }
     
-    if (right){//movingtoPosition = coordinates((movingtoPosition.x + 1), movingtoPosition.y);}
-         if (max < (abs(pacman.position.x - movingtoPosition.x+1))){
-            movingtoPosition = coordinates(this->position.x+1, this->position.y);
+    if (left) {
+            if (max < (abs(pacman.position.x - movingtoPosition.x-1))){
+                max = abs(pacman.position.x - movingtoPosition.x-1);
+                movingtoPosition = coordinates(this->position.x-1, this->position.y);
+            }
     }
+    
+    if (right){
+            if (max < (abs(pacman.position.x - movingtoPosition.x+1))){
+                movingtoPosition = coordinates(this->position.x+1, this->position.y);
+            }
+    }
+     }
+     else {
+         everySecondMove++;
+          if (everySecondMove == 2){ everySecondMove = 0; } 
     }
     return movingtoPosition;
 }
