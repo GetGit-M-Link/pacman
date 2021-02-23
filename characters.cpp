@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <QElapsedTimer>
+#include <cstdlib>
 
 coordinates::coordinates(int x, int y){
         this->x = x;
@@ -104,7 +105,8 @@ coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirecti
 }
 
 coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman){
-    coordinates movingtoPosition = this->position;;
+    coordinates movingtoPosition = this->position;
+    int max = 0;
     bool up = false;
     bool down= false;
     bool left= false;
@@ -117,19 +119,28 @@ coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDi
     }   
     if (up) { 
         //movingtoPosition = coordinates(movingtoPosition.x, (movingtoPosition.y - 1));}
-        std::cout << "up " << std::to_string(pacman.position.y - movingtoPosition.y) << std::endl;
+       movingtoPosition = coordinates(this->position.x, this->position.y-1); 
+       max = abs((pacman.position.y - movingtoPosition.y-1));
     }
    
     if (down){//movingtoPosition = coordinates(movingtoPosition.x, (movingtoPosition.y + 1));}
-        std::cout << "down " << std::to_string(pacman.position.y - movingtoPosition.y) << std::endl;
+        if (max < (abs(pacman.position.y - movingtoPosition.y+1))){
+            max = abs(pacman.position.y - movingtoPosition.y+1);
+        movingtoPosition = coordinates(this->position.x, this->position.y+1);
+    }
     }
     
     if (left) {//movingtoPosition = coordinates((movingtoPosition.x - 1), movingtoPosition.y);}
-        std::cout << "left " << std::to_string(pacman.position.x - movingtoPosition.x) << std::endl;
+        if (max < (abs(pacman.position.x - movingtoPosition.x-1))){
+            max = abs(pacman.position.x - movingtoPosition.x-1);
+            movingtoPosition = coordinates(this->position.x-1, this->position.y);
+    }
     }
     
     if (right){//movingtoPosition = coordinates((movingtoPosition.x + 1), movingtoPosition.y);}
-        std::cout << "right " << std::to_string(pacman.position.y - movingtoPosition.y) << std::endl;
+         if (max < (abs(pacman.position.x - movingtoPosition.x+1))){
+            movingtoPosition = coordinates(this->position.x+1, this->position.y);
+    }
     }
     return movingtoPosition;
 }
