@@ -41,11 +41,14 @@ public:
 class StupidGhost : public Meeple{
 public:
     StupidGhost(int x, int y);
-    coordinates Move();
+    bool isParkedOnDot;
+    coordinates Move(const std::vector<move_direction> &possibleDirections);
 };
  
 class PacmanWindow : public ConsoleWindow
 {
+    int cycle = 3;
+    int currentCycle = 0;
     Pacman player;
     std::vector<StupidGhost> stupid_ghosts;
     state_of_game gameState;
@@ -57,7 +60,9 @@ class PacmanWindow : public ConsoleWindow
     QElapsedTimer timer;
     void writeHeader();
     void checkIfWin();
+    std::vector<move_direction> GetPossibleDirections(const StupidGhost &ghost);
     void MoveGhosts();
+  
     
  protected:
     virtual void onRefresh() override;

@@ -64,12 +64,13 @@ coordinates Pacman::Move(const char& pressedKey)
 }
 StupidGhost::StupidGhost(int x, int y){
     position = coordinates(x,y);
+    isParkedOnDot = true;
     
     
 }
-coordinates StupidGhost::Move()
+coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirections)
 {
-    direction = rrndDirection();
+    direction = possibleDirections[rrnd(0,possibleDirections.size())];
     coordinates movingtoPosition = this->position;
     if (direction == directionUp){
          movingtoPosition = coordinates(this->position.x, (this->position.y - 1));}
@@ -103,7 +104,7 @@ std::vector<std::vector<char>> PacmanWindow::Parsemap(int &pointCount)
         int column = 0;
         for (char c : s){
             
-            if (c == 'G') { stupid_ghosts.push_back(StupidGhost(column, lineNumber));}
+            if (c == 'G') { stupid_ghosts.push_back(StupidGhost(column, lineNumber +1));}
             if (c == 'g') { c = 'G'; stupid_ghosts.push_back(StupidGhost(column, lineNumber));}
             line.push_back(c);
             if (c == '.') { pointCount++;}
@@ -160,21 +161,41 @@ void PacmanWindow::checkIfWin()
        timeNeeded = std::to_string(timer.elapsed()/1000);
             }
 }
+std::vector<move_direction> PacmanWindow::GetPossibleDirections(const StupidGhost& ghost)
+{
+    std::vector<move_direction> possibleDirections;
+    if ((getCharacter(ghost.position.x, ghost.position.y - 1) == ' ')||getCharacter(ghost.position.x, ghost.position.y - 1) == '.'){
+        possibleDirections.push_back(directionUp); }
+    if ((getCharacter(ghost.position.x, ghost.position.y + 1) == ' ')||getCharacter(ghost.position.x, ghost.position.y + 1) == '.'){
+        possibleDirections.push_back(directionDown); }
+    if ((getCharacter(ghost.position.x-1, ghost.position.y) == ' ')||getCharacter(ghost.position.x-1, ghost.position.y) == '.'){
+        possibleDirections.push_back(directionLeft); }
+    if ((getCharacter(ghost.position.x+1, ghost.position.y) == ' ')||getCharacter(ghost.position.x+1, ghost.position.y) == '.'){
+        possibleDirections.push_back(directionRight); }
+   return possibleDirections;
+    
+}
 
 void PacmanWindow::MoveGhosts()
 {
     for (StupidGhost &ghost  : stupid_ghosts){
-        coordinates newPos = ghost.Move();
-     bool validMove = ((getCharacter(newPos.x, newPos.y) == ' ') || getCharacter(newPos.x, newPos.y) == '.');
-     std::string s;
-     s.push_back(getCharacter(newPos.x, newPos.y));
-     if (validMove){
-                std::cout << s << std::endl;
+        std::vector<move_direction> possibleDirections = GetPossibleDirections(ghost);
+        coordinates newPos = ghost.Move(possibleDirections);
+        bool emptySpace = getCharacter(newPos.x, newPos.y) == ' ';
+        bool point = getCharacter(newPos.x, newPos.y) == '.';
+        if (emptySpace || point){
+            // Verhindere dass Geist Punkte frisst
+            if (!ghost.isParkedOnDot){
                 setCharacter(ghost.position.x, ghost.position.y, ' ');
-                setCharacter(newPos.x, newPos.y, 'G');
-                ghost.position = newPos;
-     }
-     else {
+            }
+            else {
+                setCharacter(ghost.position.x, ghost.position.y, '.');
+            }
+            point ? ghost.isParkedOnDot = true : ghost.isParkedOnDot = false;
+            setCharacter(newPos.x, newPos.y, 'G');
+            ghost.position = newPos;
+        }
+        else {
          //std::cout << s  << std::endl;
          
      }
@@ -184,16 +205,19 @@ void PacmanWindow::MoveGhosts()
 
 void PacmanWindow::onRefresh()
 {
-      coordinates movingtoPosition = player.position;
+     coordinates movingtoPosition = player.position;
      bool emptySpace;
      bool pointFood;
      bool ghostCollision;
      char key = getPressedKey();
+     
     
     switch(gameState){
         case theGameIsOn:
             writeHeader();
             checkIfWin();
+            if (currentCycle == 0){
+                currentCycle++;
             movingtoPosition = player.Move(key);
             MoveGhosts();
             
@@ -212,7 +236,12 @@ void PacmanWindow::onRefresh()
             }
             if (ghostCollision){
                 gameState = gameOver;
-                std::cout << "dumdumdumdum" << std::endl;
+            }
+                
+            }
+            else {
+                currentCycle++;
+                if (currentCycle == cycle){ currentCycle = 0; } 
             }
             break;
             
