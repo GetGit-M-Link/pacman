@@ -5,6 +5,7 @@
 #include <fstream>
 #include <QElapsedTimer>
 #include <cstdlib>
+#include <algorithm>
 
 coordinates::coordinates(int x, int y){
         this->x = x;
@@ -111,6 +112,8 @@ coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirecti
 coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman){
     coordinates movingtoPosition = this->position;
     int max = 0;
+    int up_down = 0;
+    int left_right = 0;
     bool up = false;
     bool down= false;
     bool left= false;
@@ -123,15 +126,29 @@ coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDi
         if (direction == directionLeft){left = true;}
         if (direction == directionRight){right = true;}
     }   
+    
+    if (up||down){
+        up_down = pacman.position.y - this->position.y;
+    }
+    if (left||right){
+        up_down = pacman.position.x - this->position.x;
+    }
+    /*
+    max = std::max(abs((pacman.position.y - movingtoPosition.y)),abs((pacman.position.x - movingtoPosition.x)));
     if (up) { 
-            movingtoPosition = coordinates(this->position.x, this->position.y-1); 
-            max = abs((pacman.position.y - movingtoPosition.y-1));
+         if (max < (abs(pacman.position.y - movingtoPosition.y-1))){ 
+                movingtoPosition = coordinates(this->position.x, this->position.y-1); 
+                max = abs((pacman.position.y - movingtoPosition.y-1));
+                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
+         }
     }
    
     if (down){
             if (max < (abs(pacman.position.y - movingtoPosition.y+1))){ 
                 max = abs(pacman.position.y - movingtoPosition.y+1);
                 movingtoPosition = coordinates(this->position.x, this->position.y+1);
+                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
+                std::cout << pacman.position.x << " " << pacman.position.y << std::endl;
             }
     }
     
@@ -139,14 +156,18 @@ coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDi
             if (max < (abs(pacman.position.x - movingtoPosition.x-1))){
                 max = abs(pacman.position.x - movingtoPosition.x-1);
                 movingtoPosition = coordinates(this->position.x-1, this->position.y);
+                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
+                std::cout << pacman.position.x << " " << pacman.position.y << std::endl;
             }
     }
     
     if (right){
             if (max < (abs(pacman.position.x - movingtoPosition.x+1))){
                 movingtoPosition = coordinates(this->position.x+1, this->position.y);
+                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
+                std::cout << pacman.position.x << " " << pacman.position.y << std::endl;
             }
-    }
+    }*/
      }
      else {
          everySecondMove++;
