@@ -1,9 +1,11 @@
 #ifndef PACMAN_H
 #define PACMAN_H
 
+#include "characters.h"
 #include <ConsoleWindow.h>
 #include <QElapsedTimer>
-#include "characters.h"
+#include <memory>
+
 
 /**
  * @todo write docs
@@ -21,10 +23,11 @@ class PacmanWindow : public ConsoleWindow
     int currentCycle = 0;
     Pacman player;
     std::vector<coordinates> ghosts_original_pos;
-    std::vector<Ghost*> ghosts;
+    std::vector<std::unique_ptr<Ghost>> ghosts;
     state_of_game gameState;
     on_screen currentScreen;
     int levelMaxPoints;
+    void paintLevel();
     std::vector<std::vector<char>> levelMap;
     std::vector<std::vector<char>> Parsemap(int &pointCount);
     std::string levelFile;
@@ -33,6 +36,7 @@ class PacmanWindow : public ConsoleWindow
     int bestTime;
     QElapsedTimer timer;
     void writeHeader();
+    void writeFooter();
     void checkIfWin();
     std::vector<move_direction> GetPossibleDirections(const Meeple* meeple);
     void MoveGhosts();

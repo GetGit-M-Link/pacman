@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <memory>
 
 
 /// Ein einfaches Konsolenfenster. Es unterstützt die folgenden Features,
@@ -34,6 +35,9 @@ class ConsoleWindow : public QMainWindow
      private:
         /// speichert alle die Zeichen, die dargestellt werden als 1D array (x + width*y Format)
         std::vector<char> textBuffer;
+        std::vector<char> iconBuffer;
+        
+        
 
         /// Breite des 2D Arrays
         unsigned width;
@@ -53,12 +57,18 @@ class ConsoleWindow : public QMainWindow
         void keyReleaseEvent(QKeyEvent *event) override;
         /// überschriebener Eventhandler Paint-Events (Zeichnen der Konsole)
         void paintEvent(QPaintEvent *event) override;
+        /// speichert den aktuellen Level, der dargestellt werden als 1D array (x + width*y Format) als Pointer auf QPixmaps
+        
 
      public:
-        ConsoleWidget(std::function<void()> onKeyPressFunc, QWidget *parent = nullptr, unsigned width = 64, unsigned height = 48, unsigned charSize = 12);
+        ConsoleWidget(std::function<void()> onKeyPressFunc, QWidget *parent = nullptr, unsigned width = 64, unsigned height = 48, unsigned charSize = 16);
         void setCharSize(unsigned charSize);
         inline void setCharacter(int x, int y, char character);
         inline char getCharacter(int x, int y);
+        inline char getIcon(int x, int y);
+        inline void setIcon(int x, int y, char character);
+    
+       
         inline unsigned getWidth() { return width; }
         inline unsigned getHeight() { return height; }
         inline char getPressedKey() { return lastKey; }
@@ -125,18 +135,24 @@ class ConsoleWindow : public QMainWindow
     /// Die x,y-Koordinaten werden "geclippt", d.h., es passiert nichts, falls sie den zulässigen
     /// Wertebereich [0,...,width-1], [0,...,height-1] verlassen.
     void setCharacter(int x, int y, char character);
-
+    // setzt ein Icon an Koordinate (x,y)
+    void setIcon(int x, int y, char character);
+   
+    void ClearCurrentLevel();
     /// Ließt das Zeichen an Spalte x und Zeile y aus.
     /// Die x,y Koordinaten werden wieder "geclippt": falls x,y außerhalb des
     /// zulässigen Wertebereichs liegen, gibt die Funktion 0 zurück
     char getCharacter(int x, int y);
+    char getIcon(int x, int y);
 
     /// Schreibt einen längeren String auf die Konsole, startend bei x,y
     /// Zeichen außerhalb der sichtbaren Konsole werden "geclipped" (also abgeschnitten, kein Fehler)
     void writeString(int x, int y, std::string text);
+    void writeIcons(int x, int y, std::string text);
 
     /// Löscht die Konsole, Standardmäßig mit Leerzeichen
     void clear(char character = ' ');
+    void clearIcons();
 
     /// Gibt die Taste zurück, die als letztes heruntergedrückt wurde
     /// (und noch nicht wieder losgelassen wurde).

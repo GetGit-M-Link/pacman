@@ -1,5 +1,6 @@
 #include "ConsoleWindow.h"
 
+
 #include <QKeyEvent>
 #include <QPainter>
 #include <QHBoxLayout>
@@ -8,9 +9,26 @@
 #include <QFrame>
 #include <QMenu>
 #include <QMenuBar>
+#include <iostream>
+#include <QString>
+
 
 // --- ConsoleWindow::ConsoleWidget
 
+
+std::unordered_map<char, QString> icons = {
+    {'|', "v-wall.png"},
+    {'g', "stupid_ghost.png"},
+    {'G', "smart_ghost.png"},
+    {'+', "right-upper-corner.png"},
+    {'*', "pacman.png"},
+    {'.', "dot.png"},
+    /*{'|', "right-lower-corner.png"},
+    {'|', "left-upper-corner.png"},
+    {'|', "left-lower-corner.png"},*/
+    {'-', "h-wall.png"},
+    {'X', "brick.png"},
+};
 /// convertes qt keyboard event to ascii code (using special values of class ConsoleWindow)
 char convert_2_ascii(QKeyEvent *event)
 {
@@ -56,6 +74,8 @@ void ConsoleWindow::ConsoleWidget::paintEvent(QPaintEvent *event)
 {
     std::ignore = event;
     QPainter painter(this);
+    
+    
     QRect r = geometry();
     r.setX(0);
     r.setY(0);
@@ -68,11 +88,20 @@ void ConsoleWindow::ConsoleWidget::paintEvent(QPaintEvent *event)
     int offset = metrics.ascent(); // vertical distance to baseline - for placement in y-direction
     for (unsigned y = 0; y < height; y++) {
         for (unsigned x = 0; x < width; x++) {
+             if (iconBuffer[x + width * y] == ' '){
             painter.drawText(int(x * charSize),
                              int(y * charSize) + offset,
                              QString(textBuffer[x + width * y]));
+             }
+            if (iconBuffer[x + width * y] != ' '){
+            painter.drawPixmap(int(x * charSize),
+                             int(((y * charSize) )) , QPixmap(icons[iconBuffer[x + width * y]]));
+            }
+            
+           
         }
     }
+    
 }
 
 ConsoleWindow::ConsoleWidget::ConsoleWidget(std::function<void()> onKeyPressFunc,
@@ -82,6 +111,7 @@ ConsoleWindow::ConsoleWidget::ConsoleWidget(std::function<void()> onKeyPressFunc
                                             unsigned charSize)
     : QWidget(parent), // parent constructor
       textBuffer(width * height,
+                 ' '),iconBuffer(width * height,
                  ' '), // textBuffer constructor - std::vector<char>(initial_size, initial_value)
     onKeyPress(onKeyPressFunc)
 {
@@ -117,12 +147,29 @@ void ConsoleWindow::ConsoleWidget::setCharacter(int x, int y, char character)
     }
     textBuffer[static_cast<size_t>(x + int(width) * y)] = character;
 }
+void ConsoleWindow::ConsoleWidget::setIcon(int x, int y, char character)
+{
+    if (x < 0 || x >= int(width) || y < 0 || y >= int(height)) {
+        return;
+    }
+    if (character < ' ' || character > 126) {
+        character = ' ';
+    }
+    iconBuffer[static_cast<size_t>(x + int(width) * y)] = character;
+}
+
 
 char ConsoleWindow::ConsoleWidget::getCharacter(int x, int y)
 {
     if (x < 0 || x >= int(width) || y < 0 || y >= int(height))
         return 0;
     return textBuffer[static_cast<size_t>(x + int(width) * y)];
+}
+char ConsoleWindow::ConsoleWidget::getIcon(int x, int y)
+{
+    if (x < 0 || x >= int(width) || y < 0 || y >= int(height))
+        return 0;
+    return iconBuffer[static_cast<size_t>(x + int(width) * y)];
 }
 
 
@@ -212,9 +259,19 @@ void ConsoleWindow::setCharacter(int x, int y, char character)
     console->setCharacter(x, y, character);
 }
 
+void ConsoleWindow::setIcon(int x, int y, char character)
+{
+    console->setIcon(x, y, character);
+}
+
 char ConsoleWindow::getCharacter(int x, int y)
 {
     return console->getCharacter(x, y);
+}
+
+char ConsoleWindow::getIcon(int x, int y)
+{
+    return console->getIcon(x, y);
 }
 
 void ConsoleWindow::writeString(int x, int y, std::string text)
@@ -224,6 +281,14 @@ void ConsoleWindow::writeString(int x, int y, std::string text)
         console->setCharacter(x + i, y, text[size_t(i)]);
     }
 }
+void ConsoleWindow::writeIcons(int x, int y, std::string text)
+{
+    int l = int(text.size());
+    for (int i = 0; i < l; i++) {
+        console->setIcon(x + i, y, text[size_t(i)]);
+    }
+}
+
 
 void ConsoleWindow::clear(char character)
 {
@@ -232,6 +297,16 @@ void ConsoleWindow::clear(char character)
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             console->setCharacter(x, y, character);
+        }
+    }
+}
+void ConsoleWindow::clearIcons()
+{
+    int width = int(getWidth());
+    int height = int(getHeight());
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            console->setIcon(x, y, ' ');
         }
     }
 }
