@@ -1,0 +1,33 @@
+ 
+ 
+main.cpp:
+Erstellt das Fenster und zeigt es an.
+
+pacman.h/pacman.cpp:
+
+Die Klasse PacmanWindow erbt von der bereitgestellten ConsoleWindow.
+Hier findet die Simulation des Spiels selbst statt.
+Es werden die Level geparst und angezeigt, das Menu verwaltet und die Figuren verwaltet.
+
+Zwischen Menu und Spiel wird durch ein enum (currentScreen) unterschieden und die verschiedenen Gamestati werden ebenfalls durch enums (gameOver, theGameIsOn und gameWon) verwaltet.
+
+characters.h/characters.cpp:
+
+Enthält die Spielfiguren und Hilfsstrukturen wie Koordinaten und Richtungen.
+Alle Spielfiguren habe die Basisklasse Meeple gemeinsam.
+Davon leiten sich Pacman ab und die Geisterbasisklasse Ghost.
+Ghost enthält die Eigenschaften die die Geister gemeinsam haben, sowie die pure virtual Funktion Move.
+Die zwei Geistertypen haben jeweils ihre eigene Movefunktion, da sie sich ja unterschiedlich bewegen.
+
+ConsoleWindow.h/ConsoleWindow.cpp:
+Die gegebene Bibliothek habe ich für die Grafikausgabe erweitert durch einen weiteren std::vector<char> namens iconBuffer und entsprechende Getter/Setter/Clear Funktionen.
+Die Funktion ist dabei wie der textBuffer aus der original Datei, nur dass diese Zeichen in der paintEvent Methode nicht als Text auf den Bildschirm geschrieben werden sondern übersetzt werden in 
+ein QPixmap. 
+Dadurch kann man genauso wie zuvor Text, jederzeit Icons an allen Stellen des Programms einfügen.
+Die Icons werden dazu durch die unordered map icons aus chars in Dateinamen übersetzt, man kann also so viele Icons anlegen wie man Asciizeichen hat.
+Wenn man ein neues Icon hinzufügen will kann man eine png Datei in den Dateiordner stecken und icons entsprechend erweitern.
+
+
+Ablauf:
+
+Das Spiel 
