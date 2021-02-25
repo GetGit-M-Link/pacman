@@ -10,8 +10,6 @@ add_executable(klausur
         pacman.h
         characters.cpp
         characters.h
-        icons.cpp
-        icons.h
         ConsoleWindow.cpp
         ConsoleWindow.h
         main.cpp)

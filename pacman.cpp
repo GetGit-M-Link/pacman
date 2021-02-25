@@ -119,7 +119,7 @@ void PacmanWindow::MainMenu()
                 writeIcons(10,16,"G");
                 writeIcons(30,16,"G");
                 writeIcons(8,18,"T-----------------------------t");  
-                writeIcons(8,30,"L-----------------------------J");   
+                writeIcons(8,28,"L-----------------------------J");   
      
                 writeString(48,18,"Press Key:");
                 
@@ -135,38 +135,55 @@ void PacmanWindow::MainMenu()
                 writeString(52,22,"s");
                 // in onKeypress()
                 
-                //Steuerung
-                writeString(10,24,"3. Controls:");
-                
                 //Spiel starten
-                writeString(10,26,"4. Start Game");
-                writeString(52,26,"g");
+                writeString(10,24,"3. Start Game");
+                writeString(52,24,"g");
                 if (getPressedKey() == 'g'){ 
                     currentScreen = game; 
                     levelMap = Parsemap(levelMaxPoints);
                     Initialize();
                     return;}
                 //Spiel beenden (q funktioniert immer daher ist das Tasteneevent weiter oben)
-                writeString(10,28,"5. Quit Game");
-                writeString(52,28,"q");
+                writeString(10,26,"4. Quit Game");
+                writeString(52,26,"q");
 }
 void PacmanWindow::WinMenu()
 {
     clear(' ');
     clearIcons();
-    writeString(5,5,"Well done Level completed in:  " + std::to_string(timeNeeded) + " seconds" );
-    writeString(5,17,"best time: " + std::to_string(bestTime));
-    writeString(5,12,"Want to play again? (y/n) ");
-    writeString(5,14,"Back to the menu? (m) ");
-    if (getPressedKey() == 'y'){ Initialize();}
+    writeIcons(8,3,"T-------------------------------t");
+    writeIcons(3, 9, "G");
+    writeIcons(45, 9, "G");
+    writeIcons(6, 25, "       G              G              G       ");
+    writeIcons(6, 35, "G              G              G              G");
+    writeString(10,5,"Well done! Level completed in:  ");
+    writeString(21,7, (std::to_string(timeNeeded) + " seconds"));
+    if ((bestTime > 0)&& (timeNeeded >= bestTime)){
+        writeString(10,9,"Best Time: " + std::to_string(bestTime));
+    }
+    else if ((bestTime > 0)&& (timeNeeded < bestTime)){
+        writeString(10,11,"New Best Time: " + std::to_string(timeNeeded));
+    }
+    
+    
+    writeString(10,13,"Want to play again? (y/n) ");
+    writeString(10,15,"Back to the menu? (m) ");
+    writeIcons(8,17,"L-------------------------------J");  
+    if (getPressedKey() == 'y'){bestTime = timeNeeded; Initialize();}
     if (getPressedKey() == 'n'){ Cleanup();close();}
 }
 void PacmanWindow::GameOverMenu()
 {
      clear(' ');
      clearIcons();
-     writeString(5,5,"Game Over");
-     writeString(5,7,"Want to play again? (y/n) ");
+     writeIcons(8,3,"T-------------------------------t");
+     writeIcons(3, 9, "g");
+     writeIcons(45, 9, "g");
+     writeIcons(6, 25, "       g              g              g       ");
+     writeIcons(6, 35, "g              g              g              g");
+     writeIcons(8,17,"L-------------------------------J");  
+     writeString(10,9,"Game Over");
+     writeString(10,12,"Want to play again? (y/n) ");
      if (getPressedKey() == 'y'){ Initialize();}
      if (getPressedKey() == 'n'){ Cleanup(); close();}
 }
