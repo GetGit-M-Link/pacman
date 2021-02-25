@@ -11,5 +11,4 @@
 
 ## Quellen
 - https://www.techiedelight.com/convert-vector-chars-std-string/
-- https://doc.qt.io/qt-5/qelapsedtimer.html 
 - https://www.cplusplus.com/reference/string/string/find/ 
