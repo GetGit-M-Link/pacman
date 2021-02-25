@@ -23,9 +23,9 @@ std::unordered_map<char, QString> icons = {
     {'+', "right-upper-corner.png"},
     {'*', "pacman.png"},
     {'.', "dot.png"},
-    /*{'|', "right-lower-corner.png"},
-    {'|', "left-upper-corner.png"},
-    {'|', "left-lower-corner.png"},*/
+    {'J', "right-lower-corner.png"},
+    {'T', "left-upper-corner.png"},
+    {'L', "left-lower-corner.png"},
     {'-', "h-wall.png"},
     {'X', "brick.png"},
 };
@@ -86,6 +86,8 @@ void ConsoleWindow::ConsoleWidget::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::white);
     QFontMetrics metrics(fixedFont);
     int offset = metrics.ascent(); // vertical distance to baseline - for placement in y-direction
+    bool bottomCorner;
+    bool leftCorner;
     for (unsigned y = 0; y < height; y++) {
         for (unsigned x = 0; x < width; x++) {
              if (iconBuffer[x + width * y] == ' '){
@@ -94,11 +96,18 @@ void ConsoleWindow::ConsoleWidget::paintEvent(QPaintEvent *event)
                              QString(textBuffer[x + width * y]));
              }
             if (iconBuffer[x + width * y] != ' '){
-            painter.drawPixmap(int(x * charSize),
-                             int(((y * charSize) )) , QPixmap(icons[iconBuffer[x + width * y]]));
+                if (iconBuffer[(x + width * y)] == '+'){
+                    bottomCorner = (iconBuffer[(x + width * y)+width] != '|');
+                    leftCorner = (iconBuffer[(x + width * y) -1] != '-');
+                    if (bottomCorner && leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['L']));}
+                    else if (bottomCorner && !leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['J']));}
+                    else if (!bottomCorner && leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['T']));}
+                    else if (!bottomCorner && !leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['+']));}
+                }
+                else {
+                        painter.drawPixmap(int(x * charSize),
+                             int(y * charSize ) + offset , QPixmap(icons[iconBuffer[(x + width * y) ]]));}
             }
-            
-           
         }
     }
     
