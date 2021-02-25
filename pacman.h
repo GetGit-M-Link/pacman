@@ -27,7 +27,6 @@ class PacmanWindow : public ConsoleWindow
     state_of_game gameState;
     on_screen currentScreen;
     int levelMaxPoints;
-    void paintLevel();
     std::vector<std::vector<char>> levelMap;
     std::vector<std::vector<char>> Parsemap(int &pointCount);
     std::string levelFile;
@@ -37,9 +36,13 @@ class PacmanWindow : public ConsoleWindow
     QElapsedTimer timer;
     void writeHeader();
     void writeFooter();
+    void MainMenu();
+    void WinMenu();
+    void GameOverMenu();
     void checkIfWin();
     std::vector<move_direction> GetPossibleDirections(const Meeple* meeple);
     void MoveGhosts();
+    void MovePacman();
     void Cleanup();
   
     

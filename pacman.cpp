@@ -7,7 +7,7 @@
 #include <fstream>
 #include <QElapsedTimer>
 #include <unordered_map>
-#include <QPainter>
+
 
 
 
@@ -105,6 +105,72 @@ void PacmanWindow::writeFooter()
 {
     writeString(0,  41, "Return to Menu (m)  Quit (q) ");
 }
+void PacmanWindow::MainMenu()
+{
+    clear(' ');
+                clearIcons();
+                writeString(28,4,"EIS-Pacman!");
+                std::string xline(64,'X');
+                writeIcons(0, 6, xline);
+                writeString(28,8,"Main Menu");
+                writeIcons(0, 10, xline);
+                
+                writeIcons(20,13,"*");
+                writeIcons(10,16,"G");
+                writeIcons(30,16,"G");
+                writeIcons(8,18,"T-----------------------------t");  
+                writeIcons(8,30,"L-----------------------------J");   
+     
+                writeString(48,18,"Press Key:");
+                
+                writeString(10,20,"1. Choose Level: " + levelFile);
+                writeString(50,20,"1/2/3");
+                
+                //Schwierigkeitsgrad
+                std::string difficulty;
+                if (cycle == 1){difficulty = "3/3";}
+                else if (cycle == 3){difficulty = "2/3";}
+                else if (cycle == 10){difficulty = "1/3";}
+                writeString(10,22,"2. Difficulty: " + difficulty);
+                writeString(52,22,"s");
+                // in onKeypress()
+                
+                //Steuerung
+                writeString(10,24,"3. Controls:");
+                
+                //Spiel starten
+                writeString(10,26,"4. Start Game");
+                writeString(52,26,"g");
+                if (getPressedKey() == 'g'){ 
+                    currentScreen = game; 
+                    levelMap = Parsemap(levelMaxPoints);
+                    Initialize();
+                    return;}
+                //Spiel beenden (q funktioniert immer daher ist das Tasteneevent weiter oben)
+                writeString(10,28,"5. Quit Game");
+                writeString(52,28,"q");
+}
+void PacmanWindow::WinMenu()
+{
+    clear(' ');
+    clearIcons();
+    writeString(5,5,"Well done Level completed in:  " + std::to_string(timeNeeded) + " seconds" );
+    writeString(5,17,"best time: " + std::to_string(bestTime));
+    writeString(5,12,"Want to play again? (y/n) ");
+    writeString(5,14,"Back to the menu? (m) ");
+    if (getPressedKey() == 'y'){ Initialize();}
+    if (getPressedKey() == 'n'){ Cleanup();close();}
+}
+void PacmanWindow::GameOverMenu()
+{
+     clear(' ');
+     clearIcons();
+     writeString(5,5,"Game Over");
+     writeString(5,7,"Want to play again? (y/n) ");
+     if (getPressedKey() == 'y'){ Initialize();}
+     if (getPressedKey() == 'n'){ Cleanup(); close();}
+}
+
 void PacmanWindow::checkIfWin()
 {
     if (player.points == levelMaxPoints){ 
@@ -152,19 +218,45 @@ void PacmanWindow::MoveGhosts()
         }
         else {
             if (eatPacman){gameState = gameOver;}
-         //std::cout << s  << std::endl;
+         
          
      }
     }
 }
+void PacmanWindow::MovePacman()
+{
+    std::vector<move_direction> pacmansOptions = GetPossibleDirections(&player);
+    coordinates movingtoPosition = player.position;
+    char key = getPressedKey();
+    bool emptySpace;
+    bool pointFood;
+    bool ghostCollision;
+    movingtoPosition = player.Move(key, pacmansOptions);
+    
+    //Regelt Konsequenzen der Bewegung
+    emptySpace = getIcon(movingtoPosition.x, movingtoPosition.y) == ' ';
+    pointFood = getIcon(movingtoPosition.x, movingtoPosition.y) == '.';
+    ghostCollision = ((getIcon(movingtoPosition.x, movingtoPosition.y) == 'g')||(getIcon(movingtoPosition.x, movingtoPosition.y) == 'G'));
+    if ( emptySpace || pointFood ){
+                setIcon(player.position.x, player.position.y, ' ');
+                setIcon(movingtoPosition.x, movingtoPosition.y, '*');
+                setIcon(player.position.x, player.position.y, ' ');
+                setIcon(movingtoPosition.x, movingtoPosition.y, '*');
+                player.position = movingtoPosition;
+                if (pointFood){
+                        player.EatPoint();
+                    }
+                }
+    if (ghostCollision){
+            gameState = gameOver;
+    }
+}
+
 
 
 void PacmanWindow::onRefresh()
 {
-     coordinates movingtoPosition = player.position;
-     bool emptySpace;
-     bool pointFood;
-     bool ghostCollision;
+     
      char key = getPressedKey();
      
      // Spiel beenden mit q / Zurück ins Menü mit m
@@ -177,113 +269,38 @@ void PacmanWindow::onRefresh()
     
              //switch zwischen laufendem Spiel und Anzeige nachdem das Spiel gewonnen oder verloren wurde
             switch(gameState){
-                case theGameIsOn:
-                writeHeader();
-                writeFooter();
-                checkIfWin();
-                // Reguliert die Geschwindigkeit des Spiels indem es nur in gewissen Refresh Cyclen Bewegung erlaubt
-                if (currentCycle == 0){
-                    currentCycle++;
-                std::vector<move_direction> pacmansOptions = GetPossibleDirections(&player);
-                movingtoPosition = player.Move(key, pacmansOptions);
-                MoveGhosts();
+                    case theGameIsOn:
+                            writeHeader();
+                            writeFooter();
+                            checkIfWin();
+                            // Reguliert die Geschwindigkeit des Spiels indem es nur in gewissen Refresh Cyclen Bewegung erlaubt
+                            if (currentCycle == 0){
+                                    currentCycle++;
+                                    MovePacman();
+                                    MoveGhosts();
+                            }
+                            else {
+                                    currentCycle++;
+                                    if (currentCycle == cycle){ currentCycle = 0; } 
+                                    }
                 
-                //Untersucht das Feld auf dass sich bewegt werden soll
-                emptySpace = getIcon(movingtoPosition.x, movingtoPosition.y) == ' ';
-                pointFood = getIcon(movingtoPosition.x, movingtoPosition.y) == '.';
-                ghostCollision = ((getIcon(movingtoPosition.x, movingtoPosition.y) == 'g')||(getIcon(movingtoPosition.x, movingtoPosition.y) == 'G'));
+                            break;
                 
-                if ( emptySpace || pointFood ){
-                    setIcon(player.position.x, player.position.y, ' ');
-                    setIcon(movingtoPosition.x, movingtoPosition.y, '*');
-                    setIcon(player.position.x, player.position.y, ' ');
-                    setIcon(movingtoPosition.x, movingtoPosition.y, '*');
-                    player.position = movingtoPosition;
-                    if (pointFood){
-                        player.EatPoint();
-                    }
-                }
-                if (ghostCollision){
-                    gameState = gameOver;
-                }
-                    
-                }
-                else {
-                    currentCycle++;
-                    if (currentCycle == cycle){ currentCycle = 0; } 
-                }
+                    case gameWon:
+                            WinMenu();
+                            break;
                 
-                break;
-                
-            case gameWon:
-                clear(' ');
-                clearIcons();
-                writeString(5,5,"Well done Level completed in:  " + std::to_string(timeNeeded) + " seconds" );
-                writeString(5,7,"Want to play again? (y/n) ");
-                writeString(5,9,"Back to the menu? (m) ");
-                if (getPressedKey() == 'y'){ Initialize();}
-                if (getPressedKey() == 'n'){ Cleanup();close();}
-                
-                break;
-                
-            case gameOver:
-                clear(' ');
-                clearIcons();
-                writeString(5,5,"Game Over");
-                writeString(5,7,"Want to play again? (y/n) ");
-                if (getPressedKey() == 'y'){ Initialize();}
-                if (getPressedKey() == 'n'){ Cleanup(); close();}
-                break;
+                    case gameOver:
+                            GameOverMenu();
+                            break;
             
-}
+            }
                 break;
-            case menu:
-                clear(' ');
-                clearIcons();
-                writeString(28,4,"EIS-Pacman!");
-                std::string xline(64,'X');
-                writeIcons(0, 6, xline);
-                writeString(28,8,"Main Menu");
-                writeIcons(0, 10, xline);
+                case menu:
+                    MainMenu();
+                    break;
                 
-                writeIcons(20,13,"*");
-                writeIcons(10,16,"G");
-                writeIcons(30,16,"G");
-                writeIcons(8,18,"T-----------------------------t");  
-                writeIcons(8,30,"L-----------------------------J");   
-     
-                writeString(48,18,"Press Key:");
-                
-                writeString(10,20,"1. Choose Level: " + levelFile);
-                writeString(50,20,"1/2/3");
-                
-                //Schwierigkeitsgrad
-                std::string difficulty;
-                if (cycle == 1){difficulty = "3/3";}
-                else if (cycle == 3){difficulty = "2/3";}
-                else if (cycle == 10){difficulty = "1/3";}
-                writeString(10,22,"2. Difficulty: " + difficulty);
-                writeString(52,22,"s");
-                // in onKeypress()
-                
-                //Steuerung
-                writeString(10,24,"3. Controls:");
-                
-                //Spiel starten
-                writeString(10,26,"4. Start Game");
-                writeString(52,26,"g");
-                if (key == 'g'){ 
-                    currentScreen = game; 
-                    levelMap = Parsemap(levelMaxPoints);
-                    Initialize();
-                    break;}
-                //Spiel beenden (q funktioniert immer daher ist das Tasteneevent weiter oben)
-                writeString(10,28,"5. Quit Game");
-                writeString(52,28,"q");
-                
-                break;
-                
-}
+            }
 }
 
 
@@ -308,9 +325,5 @@ void PacmanWindow::Cleanup()
     ghosts.clear();
     clearIcons();
     }
-    
-    /*
-    currentLevel = getCurrentLevel();
-    for (QPixmap* icon : currentLevel){
-        delete icon;*/
+   
  

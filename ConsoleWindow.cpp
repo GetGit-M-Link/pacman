@@ -90,11 +90,11 @@ void ConsoleWindow::ConsoleWidget::paintEvent(QPaintEvent *event)
     bool leftCorner;
     for (unsigned y = 0; y < height; y++) {
         for (unsigned x = 0; x < width; x++) {
-             if (iconBuffer[x + width * y] == ' '){
+             //if (iconBuffer[x + width * y] == ' '){
             painter.drawText(int(x * charSize),
                              int(y * charSize) + offset,
                              QString(textBuffer[x + width * y]));
-             }
+             //}
             if (iconBuffer[x + width * y] != ' '){
                 if (iconBuffer[(x + width * y)] == '+'){
                     bottomCorner = (iconBuffer[(x + width * y)+width] != '|');

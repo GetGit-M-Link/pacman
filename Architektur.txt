@@ -30,4 +30,5 @@ Wenn man ein neues Icon hinzufügen will kann man eine png Datei in den Dateiord
 
 Ablauf:
 
-Das Spiel 
+Das Spiel wird über die OnRefresh() Methode reguliert.
+Dabei unterscheidet die Methode zwischen Menü und Spiel und im Spiel zwischen den einzelnen Zuständen (durch switch Anweisungen basierend auf enums siehe oben).
