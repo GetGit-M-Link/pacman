@@ -242,32 +242,44 @@ void PacmanWindow::onRefresh()
                 clearIcons();
                 writeString(28,4,"EIS-Pacman!");
                 std::string xline(64,'X');
-                writeString(0, 6, xline);
+                writeIcons(0, 6, xline);
                 writeString(28,8,"Main Menu");
-                writeString(0, 10, xline);
+                writeIcons(0, 10, xline);
                 
-                writeString(10,13,"1. Choose Level: " + levelFile + " Press 1/2/3");
+                writeIcons(20,13,"*");
+                writeIcons(10,16,"G");
+                writeIcons(30,16,"G");
+                writeIcons(8,18,"T-----------------------------t");  
+                writeIcons(8,30,"L-----------------------------J");   
+     
+                writeString(48,18,"Press Key:");
+                
+                writeString(10,20,"1. Choose Level: " + levelFile);
+                writeString(50,20,"1/2/3");
                 
                 //Schwierigkeitsgrad
                 std::string difficulty;
-                if (cycle == 1){difficulty = "hard";}
-                else if (cycle == 3){difficulty = "moderate";}
-                else if (cycle == 10){difficulty = "easy";}
-                writeString(10,14,"2. difficulty: " + difficulty + " (Change with (s))");
+                if (cycle == 1){difficulty = "3/3";}
+                else if (cycle == 3){difficulty = "2/3";}
+                else if (cycle == 10){difficulty = "1/3";}
+                writeString(10,22,"2. Difficulty: " + difficulty);
+                writeString(52,22,"s");
                 // in onKeypress()
                 
                 //Steuerung
-                writeString(10,15,"3. Controls:");
+                writeString(10,24,"3. Controls:");
                 
                 //Spiel starten
-                writeString(10,16,"4. Start Game       (g)");
+                writeString(10,26,"4. Start Game");
+                writeString(52,26,"g");
                 if (key == 'g'){ 
                     currentScreen = game; 
                     levelMap = Parsemap(levelMaxPoints);
                     Initialize();
                     break;}
                 //Spiel beenden (q funktioniert immer daher ist das Tasteneevent weiter oben)
-                writeString(10,17,"5. Quit Game       (q)");
+                writeString(10,28,"5. Quit Game");
+                writeString(52,28,"q");
                 
                 break;
                 

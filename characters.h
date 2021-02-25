@@ -13,6 +13,7 @@ struct coordinates{
     coordinates(int x, int y);
       
 };
+bool operator ==(const coordinates &lhs, const coordinates &rhs);
 enum move_direction {
     directionUp, directionDown, directionLeft, directionRight, directionNone
 };

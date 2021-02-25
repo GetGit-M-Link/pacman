@@ -11,7 +11,14 @@ coordinates::coordinates(int x, int y){
         this->x = x;
         this->y = y;
     }
-    
+bool operator ==(const coordinates &lhs, const coordinates &rhs){
+    if ((lhs.x == rhs.x)&&(lhs.y == rhs.y)){
+        return 1;
+    }
+    else {
+        return 0;
+    }
+} 
     
 /// aus ConsoleDemo:
 int rrnd(int min_value, int max_value)
@@ -111,9 +118,11 @@ coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirecti
 
 coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman){
     coordinates movingtoPosition = this->position;
-    int max = 0;
+    
     int up_down = 0;
     int left_right = 0;
+    bool LeftIsBetter;
+    bool UpIsbetter;
     bool up = false;
     bool down= false;
     bool left= false;
@@ -131,43 +140,47 @@ coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDi
         up_down = pacman.position.y - this->position.y;
     }
     if (left||right){
-        up_down = pacman.position.x - this->position.x;
+        left_right = pacman.position.x - this->position.x;
     }
-    /*
-    max = std::max(abs((pacman.position.y - movingtoPosition.y)),abs((pacman.position.x - movingtoPosition.x)));
-    if (up) { 
-         if (max < (abs(pacman.position.y - movingtoPosition.y-1))){ 
-                movingtoPosition = coordinates(this->position.x, this->position.y-1); 
-                max = abs((pacman.position.y - movingtoPosition.y-1));
-                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
-         }
+    LeftIsBetter = left_right < 0;
+    UpIsbetter = up_down < 0;
+    coordinates movingLeft = coordinates(this->position.x-1, this->position.y);
+    coordinates movingRight = coordinates(this->position.x+1, this->position.y);
+    coordinates movingUp = coordinates(this->position.x, this->position.y-1);
+    coordinates movingDown = coordinates(this->position.x, this->position.y+1);
+    
+    if (up_down != 0 && left_right != 0){
+        if (LeftIsBetter&&UpIsbetter){
+            if (abs(up_down) < (abs(left_right))||!left){movingtoPosition = movingUp;}
+            if (abs(up_down) > (abs(left_right))||!up){movingtoPosition = movingLeft;}
+            
+        }
+        else  if (LeftIsBetter&&!UpIsbetter){
+            if (abs(up_down) < (abs(left_right))||!left){movingtoPosition = movingDown;}
+            if (abs(up_down) > (abs(left_right))||!down){movingtoPosition = movingLeft;}
+            
+        }
+        else  if (!LeftIsBetter&&UpIsbetter){
+            if (abs(up_down) < (abs(left_right))||!right){movingtoPosition = movingUp;}
+            if (abs(up_down) > (abs(left_right))||!up){movingtoPosition = movingRight;}
+            
+        }
+        else  if (!LeftIsBetter&&!UpIsbetter){
+            if (abs(up_down) < (abs(left_right))||!right){movingtoPosition = movingDown;}
+            if (abs(up_down) > (abs(left_right))||!down){movingtoPosition = movingRight;}
+            
+        }
+        
     }
-   
-    if (down){
-            if (max < (abs(pacman.position.y - movingtoPosition.y+1))){ 
-                max = abs(pacman.position.y - movingtoPosition.y+1);
-                movingtoPosition = coordinates(this->position.x, this->position.y+1);
-                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
-                std::cout << pacman.position.x << " " << pacman.position.y << std::endl;
-            }
+    else if (up_down != 0){
+        if ((up_down > 0) && down){movingtoPosition = coordinates(this->position.x, this->position.y+1);}
+        else if ((up_down < 0) && up){movingtoPosition = coordinates(this->position.x, this->position.y-1); }
+    }
+    else if (left_right != 0){
+        if ((left_right > 0) && right){movingtoPosition = coordinates(this->position.x+1, this->position.y);}
+        else if ((left_right < 0) &&left){ movingtoPosition = coordinates(this->position.x-1, this->position.y);}
     }
     
-    if (left) {
-            if (max < (abs(pacman.position.x - movingtoPosition.x-1))){
-                max = abs(pacman.position.x - movingtoPosition.x-1);
-                movingtoPosition = coordinates(this->position.x-1, this->position.y);
-                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
-                std::cout << pacman.position.x << " " << pacman.position.y << std::endl;
-            }
-    }
-    
-    if (right){
-            if (max < (abs(pacman.position.x - movingtoPosition.x+1))){
-                movingtoPosition = coordinates(this->position.x+1, this->position.y);
-                std::cout << movingtoPosition.x << " " << movingtoPosition.y << std::endl;
-                std::cout << pacman.position.x << " " << pacman.position.y << std::endl;
-            }
-    }*/
      }
      else {
          everySecondMove++;

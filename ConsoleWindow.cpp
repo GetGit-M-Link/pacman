@@ -20,7 +20,7 @@ std::unordered_map<char, QString> icons = {
     {'|', "v-wall.png"},
     {'g', "stupid_ghost.png"},
     {'G', "smart_ghost.png"},
-    {'+', "right-upper-corner.png"},
+    {'t', "right-upper-corner.png"},
     {'*', "pacman.png"},
     {'.', "dot.png"},
     {'J', "right-lower-corner.png"},
@@ -99,18 +99,18 @@ void ConsoleWindow::ConsoleWidget::paintEvent(QPaintEvent *event)
                 if (iconBuffer[(x + width * y)] == '+'){
                     bottomCorner = (iconBuffer[(x + width * y)+width] != '|');
                     leftCorner = (iconBuffer[(x + width * y) -1] != '-');
-                    if (bottomCorner && leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['L']));}
-                    else if (bottomCorner && !leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['J']));}
-                    else if (!bottomCorner && leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['T']));}
-                    else if (!bottomCorner && !leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize) + offset  , QPixmap(icons['+']));}
+                    if (bottomCorner && leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize)   , QPixmap(icons['L']));}
+                    else if (bottomCorner && !leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize)  , QPixmap(icons['J']));}
+                    else if (!bottomCorner && leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize)   , QPixmap(icons['T']));}
+                    else if (!bottomCorner && !leftCorner){painter.drawPixmap(int(x * charSize),int(y * charSize)  , QPixmap(icons['t']));}
                 }
                 else {
                         painter.drawPixmap(int(x * charSize),
-                             int(y * charSize ) + offset , QPixmap(icons[iconBuffer[(x + width * y) ]]));}
+                             int(y * charSize )  , QPixmap(icons[iconBuffer[(x + width * y) ]]));}
             }
         }
     }
-    
+   
 }
 
 ConsoleWindow::ConsoleWidget::ConsoleWidget(std::function<void()> onKeyPressFunc,
