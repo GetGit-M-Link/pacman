@@ -2,6 +2,7 @@
 ## Instruktionen zum Bauen des Projektes
 -Lies sich bei sowohl aus KDevelop heraus, als auch in QTCreator als auch in der commandline mit CMake problemlos kompilieren
 QTCreator sagt : Based on Qt 5.15.2 (GCC 10.2.0, 64 bit)
+
 -Developed on Linux
 
 
