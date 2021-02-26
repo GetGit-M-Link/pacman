@@ -24,12 +24,17 @@ Ausbaustufe 2:
       Menü wird die Bestzeit entfernt, weil man ja dann theoretisch einen anderen Level aus der Textdatei laden könnte)
 
 Bonuspunkte:
-    nach 5 Sekunden im Level spawn eine Unverwundbarkeitspille (grün)
-    das geschieht nach der rrnd Funktion aus der ConsoleDemo an einem Punkt an dem zu Levelbeginn ein Punkt war.
+    Nach 5 Sekunden im Level spawned eine Unverwundbarkeitspille (grün).
+
+    Das geschieht nach der rrnd Funktion aus der ConsoleDemo an einem Punkt an dem zu Levelbeginn ein Punkt war.
+
     Wenn ein Geist über sie drüber schwebt wird sie zerstört (Punkte unter der Pille werden wieder hergestellt).
-    Wenn Pacman sie isst kann er die Geister fressen (diese verschwinden von der Karte).
-    Die "schlauen Geister" laufen dabei aktiv weg, bei den "dummen Geistern" habe ich mich bewusst dafür entschieden, dass sie auch
-    zufällig "weglaufen" ihre Bewegung ändert sich also nicht.
+
+    Wenn Pacman sie isst kann er die Geister fressen (diese verschwinden von der Karte). 
+
+    Die "schlauen Geister" laufen dabei aktiv weg, bei den "dummen Geistern" habe ich mich bewusst dafür entschieden, dass sie auch 
+    zufällig "weglaufen" ihre Bewegung ändert sich also nicht. 
+
     Nach 5 Sekunden hört die Wirkung der Pille auf und die Geister jagen wieder Pacman.
 
 
