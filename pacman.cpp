@@ -97,6 +97,7 @@ void PacmanWindow::Initialize()
          // Findet Pacmans Position und speichert sie
          std::size_t found = s.find("*");
          if (found!=std::string::npos){
+             // char in string finden https://www.cplusplus.com/reference/string/string/find/ ende
             player.SetPosition(static_cast<int>(found), lineNumber);
          }
          // Erstellt Spielfeld
@@ -113,7 +114,7 @@ void PacmanWindow::writeHeader()
         }
     writeString(0,  0, "Score: " + std::to_string(player.points) + "/" + std::to_string(levelMaxPoints));
     writeString(25, 0, "Eis-Pacman!");
-    writeString(35, 0,("time:" + std::to_string(clock.Elapsed()) + "sec  "));
+    writeString(50, 0,("time:" + std::to_string(clock.Elapsed()) + "sec  "));
 }
 void PacmanWindow::writeFooter()
 {
