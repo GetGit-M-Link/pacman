@@ -20,7 +20,8 @@ Ausbaustufe 2:
 
     - Am Ende der Runde wird angeboten ein neues Spiel zu beginnen, dabei wird die Zeit gespeichert um dann
     
-    - in der nächsten Runde als Bestzeit zu gelten die es zu schlagen gilt
+    - in der nächsten Runde als Bestzeit zu gelten die es zu schlagen gilt (nur solange man nochmal Spielen bestätigt, geht man ins
+      Menü wird die Bestzeit entfernt weil man ja dann theoretisch einen anderen Level aus der textdatei laden könnte)
 
 - ...
 
