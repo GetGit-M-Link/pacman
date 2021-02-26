@@ -21,18 +21,25 @@ class PacmanWindow : public ConsoleWindow
 {
     int cycle; 
     int currentCycle; 
+    bool pillIsActive;
+    bool pillIsOnPoint;
+    bool pillHasSpawned;
+    QElapsedTimer pillTimer;
+    QElapsedTimer pillSpawnTimer;
     Pacman player;
     std::vector<coordinates> ghosts_original_pos;
+    std::vector<coordinates> possiblePillPositions;
     std::vector<std::unique_ptr<Ghost>> ghosts;
     state_of_game gameState;
     on_screen currentScreen;
     int levelMaxPoints;
     std::vector<std::vector<char>> levelMap;
-    std::vector<std::vector<char>> Parsemap(int &pointCount);
     std::string levelFile;
-    void Initialize();
     int timeNeeded;
     int bestTime;
+    
+    std::vector<std::vector<char>> Parsemap(int &pointCount); 
+    void Initialize();
     void writeHeader();
     void writeFooter();
     void MainMenu();
@@ -51,9 +58,11 @@ class PacmanWindow : public ConsoleWindow
     };
     Time clock;
     void checkIfWin();
+    void ManagePills();
     std::vector<move_direction> GetPossibleDirections(const Meeple* meeple);
     void MoveGhosts();
     void MovePacman();
+    void GhostCollisionEvent();
     void Cleanup();
   
     

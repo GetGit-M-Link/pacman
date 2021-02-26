@@ -90,6 +90,7 @@ StupidGhost::StupidGhost(int x, int y){
     position = coordinates(x,y);
     isParkedOnDot = true;
     symbol = 'g';
+    isActive = true;
 }
 NotAsStupidGhost::NotAsStupidGhost(int x, int y)
 {
@@ -98,8 +99,9 @@ NotAsStupidGhost::NotAsStupidGhost(int x, int y)
     isParkedOnDot = true;
     everySecondMove = 0;
     symbol = 'G';
+    isActive = true;
 }
-coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman)
+coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman, const bool& pillActive)
 {
     direction = possibleDirections[rrnd(0,possibleDirections.size())];
     coordinates movingtoPosition = this->position;
@@ -116,25 +118,35 @@ coordinates StupidGhost::Move(const std::vector<move_direction> &possibleDirecti
     return movingtoPosition;
 }
 
-coordinates NotAsStupidGhost::Move(const std::vector<move_direction> &possibleDirections, Pacman &pacman){
+coordinates NotAsStupidGhost::Move(const std::vector< move_direction >& possibleDirections, Pacman& pacman, const bool& pillActive)
+{
     coordinates movingtoPosition = this->position;
     int up_down = 0;
     int left_right = 0;
     bool done = false;
     move_direction move = directionNone;
-    std::vector<move_direction> closerToPacman;
+    std::vector<move_direction> closerOrAwayFromPackman;
     if (everySecondMove == 0){
                 everySecondMove++;
                 up_down = pacman.position.y - this->position.y;
                 left_right = pacman.position.x - this->position.x;
                 
+                if (!pillActive){
+                if (left_right < 0) {closerOrAwayFromPackman.push_back(directionLeft);}
+                else if (left_right > 0) {closerOrAwayFromPackman.push_back(directionRight);}
+                if (up_down < 0) {closerOrAwayFromPackman.push_back(directionUp);}
+                else if (up_down > 0) {closerOrAwayFromPackman.push_back(directionDown);}
+                }
+                else  if (pillActive){
+                if (left_right > 0) {closerOrAwayFromPackman.push_back(directionLeft);}
+                else if (left_right < 0) {closerOrAwayFromPackman.push_back(directionRight);}
+                else if (left_right == 0) {closerOrAwayFromPackman.push_back(directionRight);closerOrAwayFromPackman.push_back(directionLeft);}
+                if (up_down > 0) {closerOrAwayFromPackman.push_back(directionUp);}
+                else if (up_down < 0) {closerOrAwayFromPackman.push_back(directionDown);}
+                else if (up_down == 0) {closerOrAwayFromPackman.push_back(directionDown);closerOrAwayFromPackman.push_back(directionUp);}
+                }
                 
-                if (left_right < 0) {closerToPacman.push_back(directionLeft);}
-                else if (left_right > 0) {closerToPacman.push_back(directionRight);}
-                if (up_down < 0) {closerToPacman.push_back(directionUp);}
-                else if (up_down > 0) {closerToPacman.push_back(directionDown);}
-                
-                for (move_direction direction : closerToPacman){
+                for (move_direction direction : closerOrAwayFromPackman){
                     for (move_direction possible : possibleDirections){
                         if (direction == possible){move = direction;done = true;break;}
                         if (done) {break;}

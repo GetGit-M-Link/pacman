@@ -19,7 +19,6 @@ std::unordered_map<std::string, std::string> levels = {
 
 
 
-
 std::vector<std::vector<char>> PacmanWindow::Parsemap(int &pointCount)
 {
     std::vector<std::vector<char>> Levelmap;
@@ -42,8 +41,12 @@ std::vector<std::vector<char>> PacmanWindow::Parsemap(int &pointCount)
             if (c == 'g') { ghosts.push_back(std::make_unique<StupidGhost>(column, lineNumber +1));pointCount++;}
             if (c == 'G') { ghosts.push_back(std::make_unique<NotAsStupidGhost>(column, lineNumber +1));pointCount++;}
             line.push_back(c);
-            if (c == '.') { pointCount++;}
+            if (c == '.') {
+                pointCount++;
+                possiblePillPositions.push_back(coordinates(column, lineNumber +1));
+            }
             column++;
+            
         }
         Levelmap.push_back(line);
         lineNumber++;
@@ -73,12 +76,16 @@ void PacmanWindow::Initialize()
     int lineNumber = 1;
     gameState = theGameIsOn;
     timeNeeded = 0;
+    pillIsActive = false;
+    pillSpawnTimer.start();
+    pillHasSpawned = false;
     clear(' ');
     //reset pacman
     player.points = 0;
     //reset ghosts
     for (int32_t i = 0; i < ghosts.size(); i++){
         ghosts[i]->position = ghosts_original_pos[i];
+        ghosts[i]->isActive = true;
         ghosts[i]->isParkedOnDot = true;
     }
     
@@ -104,9 +111,9 @@ void PacmanWindow::writeHeader()
     for (int x = 0; x < 64; x++) {
             setCharacter(x, 0, ' ');
         }
-    writeString(0,  0, "Score: " + std::to_string(player.points));
-    writeString(9,0,( "/" + std::to_string(levelMaxPoints)));
-    writeString(25, 0, "Eis-Pacman!         time:" + std::to_string(clock.Elapsed()) + "sec  ");
+    writeString(0,  0, "Score: " + std::to_string(player.points) + "/" + std::to_string(levelMaxPoints));
+    writeString(25, 0, "Eis-Pacman!");
+    writeString(35, 0,("time:" + std::to_string(clock.Elapsed()) + "sec  "));
 }
 void PacmanWindow::writeFooter()
 {
@@ -184,7 +191,6 @@ void PacmanWindow::WinMenu()
         if (bestTime == 0)
         {
             bestTime = timeNeeded;
-            
         } 
         clearIcons();
         Initialize();}
@@ -260,17 +266,42 @@ void PacmanWindow::checkIfWin()
        
             }
 }
+void PacmanWindow::ManagePills()
+{ 
+    if (pillIsActive){
+        if (pillTimer.hasExpired(5000)){
+            pillIsActive = false;
+        }
+    }
+    else if (!pillIsActive && !pillHasSpawned){
+        if (pillSpawnTimer.hasExpired(5000)){
+            coordinates pillCoordinates = possiblePillPositions[rrnd(0,possiblePillPositions.size())];
+            if (getIcon(pillCoordinates.x,pillCoordinates.y) == '.'){
+                pillIsOnPoint = true;
+            }
+            else {
+                pillIsOnPoint = false;
+                
+            }
+            setIcon(pillCoordinates.x,pillCoordinates.y,'p');
+            pillHasSpawned = true;
+            pillIsActive = true;
+        }
+    }
+}
+
 std::vector<move_direction> PacmanWindow::GetPossibleDirections(const Meeple* meeple)
 {
     std::vector<move_direction> possibleDirections;
-    if ((getIcon(meeple->position.x, meeple->position.y - 1) == ' ')||(getIcon(meeple->position.x, meeple->position.y - 1) == '.')||getIcon(meeple->position.x, meeple->position.y - 1) =='*'){
-        possibleDirections.push_back(directionUp); }
-    if ((getIcon(meeple->position.x, meeple->position.y + 1) == ' ')||(getIcon(meeple->position.x, meeple->position.y + 1) == '.')||(getIcon(meeple->position.x, meeple->position.y + 1) == '*')){
-        possibleDirections.push_back(directionDown); }
-    if ((getIcon(meeple->position.x-1, meeple->position.y) == ' ')||(getIcon(meeple->position.x-1, meeple->position.y) == '.')||(getIcon(meeple->position.x-1, meeple->position.y) == '*')){
-        possibleDirections.push_back(directionLeft); }
-    if ((getIcon(meeple->position.x+1, meeple->position.y) == ' ')||(getIcon(meeple->position.x+1, meeple->position.y) == '.')||(getIcon(meeple->position.x+1, meeple->position.y) == '*')){
-        possibleDirections.push_back(directionRight); }
+    std::vector<char> possibleFields = {' ','.','*','g','G','p'};
+    if (possibleFields.end() != std::find(possibleFields.begin(), possibleFields.end(),(getIcon(meeple->position.x, meeple->position.y - 1)))){
+            possibleDirections.push_back(directionUp);}
+    if (possibleFields.end() != std::find(possibleFields.begin(), possibleFields.end(),(getIcon(meeple->position.x, meeple->position.y + 1)))){
+            possibleDirections.push_back(directionDown);}
+    if (possibleFields.end() != std::find(possibleFields.begin(), possibleFields.end(),(getIcon(meeple->position.x-1, meeple->position.y)))){
+            possibleDirections.push_back(directionLeft);}
+    if (possibleFields.end() != std::find(possibleFields.begin(), possibleFields.end(),(getIcon(meeple->position.x+1, meeple->position.y)))){
+            possibleDirections.push_back(directionRight);}
    return possibleDirections;
     
 }
@@ -279,30 +310,43 @@ void PacmanWindow::MoveGhosts()
 {
     for (int i = 0; i< ghosts.size(); i++){
         Ghost* ghost = ghosts[i].get();
-        std::vector<move_direction> possibleDirections = GetPossibleDirections(ghost);
-        coordinates newPos = ghost->Move(possibleDirections, player);
-        bool emptySpace = getIcon(newPos.x, newPos.y) == ' ';
-        bool point = getIcon(newPos.x, newPos.y) == '.';
-        bool eatPacman = getIcon(newPos.x, newPos.y) == '*';
-        if (emptySpace || point){
-            // Verhindere dass Geist Punkte frisst
-            if (!ghost->isParkedOnDot){
-                setIcon(ghost->position.x, ghost->position.y, ' ');
-            }
-            else {
-                setIcon(ghost->position.x, ghost->position.y, '.');
-            }
-            point ? ghost->isParkedOnDot = true : ghost->isParkedOnDot = false;
-            setIcon(newPos.x, newPos.y, ghost->symbol);
-            ghost->position = newPos;
+        if (ghost->isActive){
+            std::vector<move_direction> possibleDirections = GetPossibleDirections(ghost);
+            coordinates newPos = ghost->Move(possibleDirections, player, pillIsActive);
+            bool emptySpace = getIcon(newPos.x, newPos.y) == ' ';
+            bool point = getIcon(newPos.x, newPos.y) == '.';
+            bool eatPacman = getIcon(newPos.x, newPos.y) == '*';
+            bool destroyPill = getIcon(newPos.x, newPos.y) == 'p';
+
+            if (emptySpace || point || destroyPill){
+                // Verhindere dass Geist Punkte frisst
+                if (!ghost->isParkedOnDot){
+                    setIcon(ghost->position.x, ghost->position.y, ' ');
+                }
+                else {
+                    setIcon(ghost->position.x, ghost->position.y, '.');
+                }
+                if (destroyPill){
+                pillIsOnPoint?  ghost->isParkedOnDot = true : ghost->isParkedOnDot = false;
+                }
+                else {
+                    point ? ghost->isParkedOnDot = true : ghost->isParkedOnDot = false;
+                }
+                setIcon(newPos.x, newPos.y, ghost->symbol);
+                ghost->position = newPos;
             
+            }
+            
+            else    {
+                if (eatPacman){
+                    ghost->position = newPos;
+                    GhostCollisionEvent();
+                }
+         
+         
         }
-        else {
-            if (eatPacman){gameState = gameOver;}
-         
-         
-     }
-    }
+        }
+        }
 }
 void PacmanWindow::MovePacman()
 {
@@ -311,28 +355,63 @@ void PacmanWindow::MovePacman()
     char key = getPressedKey();
     bool emptySpace;
     bool pointFood;
+    bool pillFood;
     bool ghostCollision;
     movingtoPosition = player.Move(key, pacmansOptions);
     
     //Regelt Konsequenzen der Bewegung
     emptySpace = getIcon(movingtoPosition.x, movingtoPosition.y) == ' ';
     pointFood = getIcon(movingtoPosition.x, movingtoPosition.y) == '.';
+    pillFood = getIcon(movingtoPosition.x, movingtoPosition.y) == 'p';
     ghostCollision = ((getIcon(movingtoPosition.x, movingtoPosition.y) == 'g')||(getIcon(movingtoPosition.x, movingtoPosition.y) == 'G'));
-    if ( emptySpace || pointFood ){
-                setIcon(player.position.x, player.position.y, ' ');
-                setIcon(movingtoPosition.x, movingtoPosition.y, '*');
+    if ( emptySpace || pointFood || pillFood){
                 setIcon(player.position.x, player.position.y, ' ');
                 setIcon(movingtoPosition.x, movingtoPosition.y, '*');
                 player.position = movingtoPosition;
                 if (pointFood){
                         player.EatPoint();
                     }
+                else if (pillFood){
+                        pillIsActive = true;
+                        pillTimer.start();
+                        if (pillIsOnPoint){player.EatPoint();}
+                    }
                 }
     if (ghostCollision){
-            gameState = gameOver;
+        
+        setIcon(player.position.x, player.position.y, ' ');
+        player.position = movingtoPosition;
+       
+        GhostCollisionEvent();    
     }
 }
 
+void PacmanWindow::GhostCollisionEvent()
+{
+    
+    if (!pillIsActive) {
+    gameState = gameOver;
+    }
+    else if (pillIsActive) {
+        for (int i = 0; i< ghosts.size(); i++){
+        Ghost* ghost = ghosts[i].get();
+        if (ghost->isActive){
+            if (ghost->position == player.position){
+                ghost->isActive = false;
+                
+                if (ghost->isParkedOnDot){
+                    setIcon(ghost->position.x, ghost->position.y, ' ');
+                    player.EatPoint();
+                }
+                else {
+                    setIcon(ghost->position.x, ghost->position.y, ' ');
+                }
+            }
+        }
+        
+    }
+}
+}
 
 
 void PacmanWindow::onRefresh()
@@ -357,6 +436,7 @@ void PacmanWindow::onRefresh()
                             writeHeader();
                             writeFooter();
                             checkIfWin();
+                            ManagePills();
                             // Reguliert die Geschwindigkeit des Spiels indem es nur in gewissen Refresh Cyclen Bewegung erlaubt
                             if (currentCycle == 0){
                                     currentCycle++;

@@ -23,6 +23,7 @@ std::unordered_map<char, QString> icons = {
     {'t', "right-upper-corner.png"},
     {'*', "pacman.png"},
     {'.', "dot.png"},
+    {'p', "pill.png"},
     {'J', "right-lower-corner.png"},
     {'T', "left-upper-corner.png"},
     {'L', "left-lower-corner.png"},
