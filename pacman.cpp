@@ -60,6 +60,8 @@ PacmanWindow::PacmanWindow()
     gameState = theGameIsOn;
     levelMaxPoints = 0;
     levelFile = "level1.txt";
+    cycle = 2;
+    currentCycle = 0;
     
     
     
@@ -79,7 +81,7 @@ void PacmanWindow::Initialize()
         ghosts[i]->position = ghosts_original_pos[i];
         ghosts[i]->isParkedOnDot = true;
     }
-    writeString(0,  0, "Punkte: " + std::to_string(player.points) + "/" + std::to_string(levelMaxPoints) );
+    
     for (std::vector<char> line : levelMap){
         // convert a vector of chars to std::string https://www.techiedelight.com/convert-vector-chars-std-string/ start
          std::string s(line.begin(), line.end());
@@ -94,16 +96,24 @@ void PacmanWindow::Initialize()
          writeIcons(0,  lineNumber, s );
          lineNumber++;
     }
-    timer.start();
+    clock.Start();
 }
 
 void PacmanWindow::writeHeader()
 {
-    writeString(0,  0, "Score: " + std::to_string(player.points) + "/" + std::to_string(levelMaxPoints) + "        Eis-Pacman!         time:" + std::to_string(timer.elapsed()/1000) + "sec");
+    for (int x = 0; x < 64; x++) {
+            setCharacter(x, 0, ' ');
+        }
+    writeString(0,  0, "Score: " + std::to_string(player.points));
+    writeString(9,0,( "/" + std::to_string(levelMaxPoints)));
+    writeString(25, 0, "Eis-Pacman!         time:" + std::to_string(clock.Elapsed()) + "sec  ");
 }
 void PacmanWindow::writeFooter()
 {
-    writeString(0,  41, "Return to Menu (m)  Quit (q) ");
+    writeString(2,  42, "Return to Menu");
+    writeString(17,  42, "(m)");
+    writeString(2,  43, "Quit");
+    writeString(17,  43, "(q) ");
 }
 void PacmanWindow::MainMenu()
 {
@@ -128,9 +138,9 @@ void PacmanWindow::MainMenu()
                 
                 //Schwierigkeitsgrad
                 std::string difficulty;
-                if (cycle == 1){difficulty = "3/3";}
-                else if (cycle == 3){difficulty = "2/3";}
-                else if (cycle == 10){difficulty = "1/3";}
+                if (cycle == 0){difficulty = "3/3";}
+                else if (cycle == 2){difficulty = "2/3";}
+                else if (cycle == 9){difficulty = "1/3";}
                 writeString(10,22,"2. Difficulty: " + difficulty);
                 writeString(52,22,"s");
                 // in onKeypress()
@@ -159,18 +169,31 @@ void PacmanWindow::WinMenu()
     writeString(10,5,"Well done! Level completed in:  ");
     writeString(21,7, (std::to_string(timeNeeded) + " seconds"));
     if ((bestTime > 0)&& (timeNeeded >= bestTime)){
-        writeString(10,9,"Best Time: " + std::to_string(bestTime));
+        writeString(10,9,"Best Time: " + std::to_string(bestTime)+ " seconds");
     }
     else if ((bestTime > 0)&& (timeNeeded < bestTime)){
-        writeString(10,11,"New Best Time: " + std::to_string(timeNeeded));
+        writeString(10,11,"New Best Time: " + std::to_string(timeNeeded)+ " seconds");
+        bestTime = timeNeeded;
     }
     
     
     writeString(10,13,"Want to play again? (y/n) ");
     writeString(10,15,"Back to the menu? (m) ");
     writeIcons(8,17,"L-------------------------------J");  
-    if (getPressedKey() == 'y'){bestTime = timeNeeded; Initialize();}
-    if (getPressedKey() == 'n'){ Cleanup();close();}
+    if (getPressedKey() == 'y'){
+        if (bestTime == 0)
+        {
+            bestTime = timeNeeded;
+            
+        } 
+        clearIcons();
+        Initialize();}
+        
+    if (getPressedKey() == 'n'){
+        Cleanup();
+        close();
+        
+    }
 }
 void PacmanWindow::GameOverMenu()
 {
@@ -184,15 +207,56 @@ void PacmanWindow::GameOverMenu()
      writeIcons(8,17,"L-------------------------------J");  
      writeString(10,9,"Game Over");
      writeString(10,12,"Want to play again? (y/n) ");
-     if (getPressedKey() == 'y'){ Initialize();}
+     if (getPressedKey() == 'y'){clearIcons(); Initialize();}
      if (getPressedKey() == 'n'){ Cleanup(); close();}
 }
+void PacmanWindow::SmallMenu()
+{
+    clock.Pause();
+    for (int x = 0; x < 64; x++) {
+            setCharacter(x, 0, ' ');
+        }
+    writeString(10,0,"Do you really want to quit? y/n");
+     
+    if (getPressedKey() == 'n'){clock.UnPause();currentScreen=game;}
+    if (getPressedKey() == 'y'){ Cleanup();close();}
+}
+int PacmanWindow::Time::Elapsed()
+{
+    return ((savedTime + timer.elapsed())/1000);
+}
+void PacmanWindow::Time::Start()
+{
+    timer.start();
+    savedTime = 0;
+    paused = false;
+    
+}
+void PacmanWindow::Time::Pause()
+{
+    if (!paused){
+    paused = true;
+    
+    savedTime = savedTime + timer.elapsed();
+    
+    }
+    
+}
+void PacmanWindow::Time::UnPause()
+{
+    if (paused){
+         paused = false;
+         timer.start();}
+    
+}
+
+
 
 void PacmanWindow::checkIfWin()
 {
     if (player.points == levelMaxPoints){ 
        gameState = gameWon;
-       timeNeeded = timer.elapsed()/1000;
+       timeNeeded = clock.Elapsed();
        
             }
 }
@@ -277,11 +341,14 @@ void PacmanWindow::onRefresh()
      char key = getPressedKey();
      
      // Spiel beenden mit q / Zurück ins Menü mit m
-     if (key == 'q'){ Cleanup();close();}
+     if (key == 'q'){ currentScreen = smallMenu;}
      if (key == 'm'){ Cleanup();currentScreen = menu;}
      
      //switch zwischen Menü und Spiel
      switch(currentScreen){
+         case smallMenu:
+             SmallMenu();
+             break;
          case game:
     
              //switch zwischen laufendem Spiel und Anzeige nachdem das Spiel gewonnen oder verloren wurde
@@ -293,12 +360,13 @@ void PacmanWindow::onRefresh()
                             // Reguliert die Geschwindigkeit des Spiels indem es nur in gewissen Refresh Cyclen Bewegung erlaubt
                             if (currentCycle == 0){
                                     currentCycle++;
+                                    if (currentCycle > cycle){ currentCycle = 0; } 
                                     MovePacman();
                                     MoveGhosts();
                             }
                             else {
                                     currentCycle++;
-                                    if (currentCycle == cycle){ currentCycle = 0; } 
+                                    if (currentCycle > cycle){ currentCycle = 0; } 
                                     }
                 
                             break;
@@ -323,19 +391,21 @@ void PacmanWindow::onRefresh()
 
 void PacmanWindow::onKeyPress()
 {  switch(currentScreen){
-         case game:
-             break;
-         case menu:
-             if (getPressedKey() == 's'){
-                    if (cycle == 1){cycle = 10;}
-                    else if (cycle == 3){cycle = 1;}
-                    else if (cycle == 10){cycle = 3;}
-                }
-                if (getPressedKey() == '1'){levelFile = levels["1"];}
-                if (getPressedKey() == '2'){levelFile = levels["2"];}
-                if (getPressedKey() == '3'){levelFile = levels["3"];}
-                break;
-    }       
+                case smallMenu:
+                    break;
+                case game:
+                    break;
+                case menu:
+                    if (getPressedKey() == 's'){
+                        if (cycle == 0){cycle = 9;}
+                        else if (cycle == 2){cycle = 0;}
+                        else if (cycle == 9){cycle = 2;}
+                    }
+                    if (getPressedKey() == '1'){levelFile = levels["1"];}
+                    if (getPressedKey() == '2'){levelFile = levels["2"];}
+                    if (getPressedKey() == '3'){levelFile = levels["3"];}
+                    break;
+        }       
 }
 void PacmanWindow::Cleanup()
 {

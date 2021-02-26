@@ -15,12 +15,12 @@ enum move_direction;
 enum state_of_game {
     gameOver, theGameIsOn, gameWon,
 };
-enum on_screen { menu, game};
+enum on_screen { menu, game, smallMenu};
  
 class PacmanWindow : public ConsoleWindow
 {
-    int cycle = 3;
-    int currentCycle = 0;
+    int cycle; 
+    int currentCycle; 
     Pacman player;
     std::vector<coordinates> ghosts_original_pos;
     std::vector<std::unique_ptr<Ghost>> ghosts;
@@ -33,12 +33,23 @@ class PacmanWindow : public ConsoleWindow
     void Initialize();
     int timeNeeded;
     int bestTime;
-    QElapsedTimer timer;
     void writeHeader();
     void writeFooter();
     void MainMenu();
     void WinMenu();
     void GameOverMenu();
+    void SmallMenu();
+    class Time{
+        QElapsedTimer timer;
+        int savedTime;
+        bool paused;
+    public:
+        int Elapsed();
+        void Pause();
+        void Start();
+        void UnPause();
+    };
+    Time clock;
     void checkIfWin();
     std::vector<move_direction> GetPossibleDirections(const Meeple* meeple);
     void MoveGhosts();
