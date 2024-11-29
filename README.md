@@ -1,6 +1,11 @@
 # Pacman in C++ and QT
 This was written for an exam over 4 days. Other than the original pacman, the instruction specifically stated that pacman should only move when a key is pressed. 
 
+![Bildschirmfoto_20241129_060512](https://github.com/user-attachments/assets/75872218-07ee-4803-b7bb-47c87dec0ab9)
+
+![Bildschirmfoto_20241129_060554](https://github.com/user-attachments/assets/de358a92-3abe-4a9e-8419-0147af2268df)
+
+![Bildschirmfoto_20241129_055822](https://github.com/user-attachments/assets/e0581e26-8b9d-44f4-9be1-5cdc46fc61aa)
 
 
 Original Readme:
