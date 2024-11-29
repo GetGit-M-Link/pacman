@@ -1,3 +1,9 @@
+# Pacman in C++ and QT
+This was written for an exam over 4 days. Other than the original pacman, the instruction specifically stated that pacman should only move when a key is pressed. 
+
+
+
+Original Readme:
 # Prüfung: „Einführung in die Softwareentwicklung“
 ## Instruktionen zum Bauen des Projektes
 -Lies sich bei sowohl aus KDevelop heraus, als auch in QTCreator als auch in der commandline mit CMake problemlos kompilieren
